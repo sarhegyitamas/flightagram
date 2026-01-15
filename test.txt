@@ -1,0 +1,12 @@
+This is a test file with dummy text.
+Created to test pushing to GitHub.
+
+Some sample content:
+- Item 1
+- Item 2
+- Item 3
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+Test completed successfully!

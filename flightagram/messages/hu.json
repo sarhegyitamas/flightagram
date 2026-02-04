@@ -94,5 +94,141 @@
   },
   "homepage": {
     "hello": "Üdv"
+  },
+  "auth": {
+    "login": {
+      "title": "Üdv újra",
+      "subtitle": "Jelentkezz be a Flightagram fiókodba",
+      "email": "E-mail",
+      "password": "Jelszó",
+      "submit": "Bejelentkezés",
+      "loading": "Bejelentkezés...",
+      "or": "vagy folytasd ezzel",
+      "google": "Folytatás Google-lel",
+      "github": "Folytatás GitHubbal",
+      "noAccount": "Nincs még fiókod?",
+      "register": "Regisztráció"
+    },
+    "register": {
+      "title": "Fiók létrehozása",
+      "subtitle": "Oszd meg a repülési élményeidet",
+      "displayName": "Megjelenített név",
+      "email": "E-mail",
+      "password": "Jelszó",
+      "confirmPassword": "Jelszó megerősítése",
+      "submit": "Fiók létrehozása",
+      "loading": "Fiók létrehozása...",
+      "hasAccount": "Már van fiókod?",
+      "login": "Bejelentkezés",
+      "passwordMismatch": "A jelszavak nem egyeznek",
+      "passwordTooShort": "A jelszónak legalább 6 karakternek kell lennie",
+      "checkEmail": "Ellenőrizd az e-mail fiókodat",
+      "confirmationSent": "Küldtünk egy megerősítő linket. Kérjük, ellenőrizd az e-mail fiókodat a fiókod aktiválásához.",
+      "backToLogin": "Vissza a bejelentkezéshez"
+    }
+  },
+  "dashboard": {
+    "title": "Járataim",
+    "subtitle": "Kezeld a járatfeliratkozásaidat és tartsd naprakészen a szeretteidet",
+    "noFlights": "Még nincs járatod",
+    "noFlightsDesc": "Hozd létre az első járatfeliratkozásodat, hogy elkezdhess értesítéseket küldeni a szeretteidnek.",
+    "addFlight": "Járat hozzáadása",
+    "status": {
+      "scheduled": "Tervezett",
+      "departed": "Elindult",
+      "en_route": "Úton",
+      "arrived": "Megérkezett",
+      "delayed": "Késik",
+      "canceled": "Törölve"
+    },
+    "receivers": "címzett",
+    "viewDetails": "Részletek",
+    "cancel": "Törlés",
+    "confirmCancel": "Biztosan törölni szeretnéd ezt a feliratkozást?",
+    "departure": "Indulás",
+    "arrival": "Érkezés",
+    "flight": "Járat"
+  },
+  "subscription": {
+    "create": {
+      "title": "Járat hozzáadása",
+      "subtitle": "Oszd meg az utazásodat azokkal, akik fontosak számodra",
+      "flightNumber": "Járatszám",
+      "flightNumberPlaceholder": "pl. W6 2345",
+      "flightDate": "Repülés dátuma",
+      "yourName": "A neved",
+      "yourNamePlaceholder": "Hogyan szólítsunk az üzenetekben?",
+      "searchFlight": "Járat keresése",
+      "searching": "Keresés...",
+      "noFlightFound": "Nem található járat. Kérjük, ellenőrizd a járatszámot és a dátumot.",
+      "flightFound": "Járat megtalálva",
+      "from": "Honnan",
+      "to": "Hova",
+      "scheduledDeparture": "Tervezett indulás",
+      "scheduledArrival": "Tervezett érkezés",
+      "addReceivers": "Kit értesítsünk?",
+      "addReceiversDesc": "Adj hozzá maximum 3 személyt, akik értesítéseket kapnak a járatodról.",
+      "receiverName": "Név",
+      "receiverNamePlaceholder": "pl. Anya, Apa, Párom",
+      "addReceiver": "Másik hozzáadása",
+      "removeReceiver": "Eltávolítás",
+      "createSubscription": "Feliratkozás létrehozása",
+      "creating": "Létrehozás...",
+      "success": "Feliratkozás létrehozva!",
+      "successDesc": "Oszd meg ezeket a linkeket a szeretteiddel, hogy feliratkozhassanak az értesítésekre.",
+      "copyLink": "Link másolása",
+      "copied": "Másolva!",
+      "telegramLink": "Telegram feliratkozási link",
+      "goToDashboard": "Irány a vezérlőpult"
+    },
+    "details": {
+      "title": "Járat részletei",
+      "flightInfo": "Járat információk",
+      "receiversTitle": "Címzettek",
+      "optInStatus": {
+        "pending": "Függőben",
+        "active": "Aktív",
+        "unsubscribed": "Leiratkozott"
+      },
+      "messagesTitle": "Ütemezett üzenetek",
+      "messageStatus": {
+        "pending": "Függőben",
+        "scheduled": "Ütemezve",
+        "sent": "Elküldve",
+        "failed": "Sikertelen",
+        "skipped": "Kihagyva"
+      },
+      "messageType": {
+        "departure": "Indulás",
+        "en_route": "Repülés közben",
+        "arrival": "Érkezés",
+        "delay": "Késés",
+        "cancellation": "Törlés"
+      },
+      "addReceiver": "Címzett hozzáadása",
+      "cancelSubscription": "Feliratkozás törlése",
+      "scheduledFor": "Ütemezve"
+    }
+  },
+  "track": {
+    "title": "Járat követése",
+    "subtitle": "Valós idejű értesítések egy járatról",
+    "enterFlight": "Add meg a járatszámot a követéshez",
+    "search": "Keresés",
+    "optIn": "Értesítések Telegramon",
+    "optInDesc": "Kattints ide, hogy értesítéseket kapj erről a járatról Telegramon",
+    "openTelegram": "Telegram megnyitása",
+    "flightStatus": "Járat állapota",
+    "lastUpdated": "Utoljára frissítve"
+  },
+  "common": {
+    "loading": "Betöltés...",
+    "error": "Hiba történt",
+    "tryAgain": "Újrapróbálás",
+    "back": "Vissza",
+    "save": "Mentés",
+    "delete": "Törlés",
+    "edit": "Szerkesztés",
+    "close": "Bezárás"
   }
 }

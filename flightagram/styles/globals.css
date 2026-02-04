@@ -1,60 +1,349 @@
 @import 'tailwindcss';
 
 @font-face {
-	font-family: SpaceGrotesk;
-	src: url('/assets/fonts/SpaceGrotesk.ttf');
+  font-family: SpaceGrotesk;
+  src: url('/assets/fonts/SpaceGrotesk.ttf');
 }
 
 @font-face {
-	font-family: Inter;
-	src: url('/assets/fonts/Inter.ttf');
+  font-family: Inter;
+  src: url('/assets/fonts/Inter.ttf');
 }
 
-:root {
-	--background: #ffffff;
-	--foreground: #171717;
-}
-
-@theme {
-	--font-space-grotesk: SpaceGrotesk, 'sans-serif';
-	--font-inter: Iner, 'sans-serif';
-}
-
-@theme inline {
-	--color-dark: #2a2342;
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--color-dark-font: #3a2d53;
-	--font-sans: var(--font-geist-sans);
-	--font-mono: var(--font-geist-mono);
-}
+/* Design System - All colors in HSL */
 
 @layer base {
-	:root {
-		--background: 261 28% 20%; /* #2A2342 deep violet */
-		--foreground: 240 14% 95%; /* #F2F2F5 light gray */
-		--foreground-body: 240 14% 95%;
-		--foreground-secondary: 240 14% 85%;
+  /* LIGHT MODE - Clean Premium Form */
+  :root {
+    /* Page background: warm lavender off-white */
+    --background: 264 30% 97%; /* #F6F3FA */
+    --foreground: 261 30% 25%; /* #2E243F */
+    --foreground-body: 261 30% 25%;
+    --foreground-secondary: 261 20% 45%; /* #6B5E85 */
 
-		--gradient-hero: linear-gradient(145deg, #c6a4ff 0%, #ff8ec7 50%, #ffbfa9 100%);
-		--gradient-primary: linear-gradient(135deg, #c6a4ff 0%, #ff8ec7 100%);
-		--gradient-calm: linear-gradient(180deg, #2a2342 0%, #362d52 100%);
-		--gradient-logo: linear-gradient(135deg, #c6a4ff 0%, #ffbfa9 100%);
-	}
+    /* Primary surface: pure white cards */
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 261 30% 25%;
 
-	body {
-		background-color: var(--color-dark);
-		font-family: Inter, 'sans-serif';
-	}
+    --popover: 0 0% 100%;
+    --popover-foreground: 261 30% 25%;
 
-	.bg-gradient-hero {
-		background: var(--gradient-hero);
-	}
+    /* Primary: lavender brand */
+    --primary: 261 100% 82%; /* #C6A4FF */
+    --primary-foreground: 0 0% 100%; /* White text on gradient */
+    --primary-light: 261 100% 90%;
+    --primary-glow: 261 100% 75%;
+
+    /* Secondary: pink highlights */
+    --secondary: 329 100% 77%; /* #FF8EC7 */
+    --secondary-foreground: 261 30% 25%;
+    --secondary-light: 329 100% 85%;
+
+    /* Accent: peach CTA */
+    --accent: 16 100% 83%; /* #FFBFA9 */
+    --accent-foreground: 261 30% 25%;
+    --accent-light: 16 100% 90%;
+
+    --muted: 264 20% 95%; /* Light lavender muted */
+    --muted-foreground: 261 15% 55%; /* #9B8CB6 */
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Inputs: soft lavender tones */
+    --border: 264 30% 88%; /* #DDD5EE */
+    --input: 264 40% 98%; /* #FBF9FD */
+    --ring: 261 100% 82%; /* #C6A4FF focus */
+
+    --radius: 1rem;
+
+    /* Travel-tech gradients */
+    --gradient-hero: linear-gradient(145deg, #C6A4FF 0%, #FF8EC7 50%, #FFBFA9 100%);
+    --gradient-primary: linear-gradient(135deg, #C6A4FF 0%, #FF8EC7 100%);
+    --gradient-calm: linear-gradient(180deg, #F6F3FA 0%, #EDE8F5 100%);
+    --gradient-logo: linear-gradient(135deg, #C6A4FF 0%, #FFBFA9 100%);
+
+    /* Elevated shadows - clean premium feel */
+    --shadow-soft: 0 4px 20px rgba(46, 36, 63, 0.08);
+    --shadow-glow: 0 8px 30px rgba(198, 164, 255, 0.15);
+    --shadow-elegant: 0 20px 60px rgba(46, 36, 63, 0.18);
+    --shadow-text: 0 1px 2px rgba(46, 36, 63, 0.1);
+    --glow-logo: drop-shadow(0 0 12px rgba(198, 164, 255, 0.4));
+
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Futuristic map texture - subtle for light mode */
+    --map-graticule: repeating-linear-gradient(
+      0deg,
+      hsl(261 100% 82% / 0.03) 0px,
+      transparent 1px,
+      transparent 60px,
+      hsl(261 100% 82% / 0.03) 61px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      hsl(261 100% 82% / 0.03) 0px,
+      transparent 1px,
+      transparent 60px,
+      hsl(261 100% 82% / 0.03) 61px
+    );
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 261 30% 25%;
+    --sidebar-primary: 261 100% 82%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 264 20% 95%;
+    --sidebar-accent-foreground: 261 30% 25%;
+    --sidebar-border: 264 30% 88%;
+    --sidebar-ring: 261 100% 82%;
+  }
+
+  /* DARK MODE - Clean Glass Surfaces */
+  .dark {
+    /* Keep existing dark background */
+    --background: 261 28% 20%; /* #2A2342 deep violet */
+    --foreground: 240 14% 95%; /* #F2F2F5 */
+    --foreground-body: 240 14% 95%;
+    --foreground-secondary: 240 14% 70%; /* rgba(242,242,245,0.70) */
+
+    /* Clean glass surfaces */
+    --card: 261 28% 24%; /* Slightly lighter than background */
+    --card-foreground: 240 14% 95%;
+
+    --popover: 261 28% 26%;
+    --popover-foreground: 240 14% 95%;
+
+    /* Primary: lavender brand */
+    --primary: 261 100% 82%; /* #C6A4FF */
+    --primary-foreground: 261 28% 20%;
+    --primary-light: 261 100% 90%;
+    --primary-glow: 261 100% 75%;
+
+    /* Secondary: pink highlights */
+    --secondary: 329 100% 77%; /* #FF8EC7 */
+    --secondary-foreground: 261 28% 20%;
+    --secondary-light: 329 100% 85%;
+
+    /* Accent: peach CTA */
+    --accent: 16 100% 83%; /* #FFBFA9 */
+    --accent-foreground: 261 28% 20%;
+    --accent-light: 16 100% 90%;
+
+    --muted: 261 25% 30%;
+    --muted-foreground: 240 14% 70%;
+
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 240 14% 95%;
+
+    /* Dark inputs: glass effect */
+    --border: 261 50% 65% / 0.22; /* rgba(198,164,255,0.22) */
+    --input: 0 0% 100% / 0.06; /* rgba(255,255,255,0.06) */
+    --ring: 261 100% 82%;
+
+    --gradient-primary: linear-gradient(135deg, #C6A4FF 0%, #FF8EC7 100%);
+    --gradient-calm: linear-gradient(180deg, #2A2342 0%, #362d52 100%);
+    --gradient-hero: linear-gradient(145deg, #C6A4FF 0%, #FF8EC7 50%, #FFBFA9 100%);
+
+    /* Dark elevated shadows */
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.25);
+    --shadow-glow: 0 8px 30px rgba(198, 164, 255, 0.2);
+    --shadow-elegant: 0 20px 60px rgba(0, 0, 0, 0.45);
+    --shadow-text: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --glow-logo: drop-shadow(0 0 16px rgba(198, 164, 255, 0.5));
+
+    --map-graticule: repeating-linear-gradient(
+      0deg,
+      hsl(261 100% 82% / 0.05) 0px,
+      transparent 1px,
+      transparent 60px,
+      hsl(261 100% 82% / 0.05) 61px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      hsl(261 100% 82% / 0.05) 0px,
+      transparent 1px,
+      transparent 60px,
+      hsl(261 100% 82% / 0.05) 61px
+    );
+
+    --sidebar-background: 261 28% 24%;
+    --sidebar-foreground: 240 14% 95%;
+    --sidebar-primary: 261 100% 82%;
+    --sidebar-primary-foreground: 261 28% 20%;
+    --sidebar-accent: 261 25% 30%;
+    --sidebar-accent-foreground: 240 14% 95%;
+    --sidebar-border: 261 50% 65% / 0.22;
+    --sidebar-ring: 261 100% 82%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: Inter, system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', Inter, system-ui, sans-serif;
+  }
+
+  /* Subtle map texture background */
+  .bg-map-texture {
+    background-image: var(--map-graticule);
+  }
+
+  /* Gradient utility classes */
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .bg-gradient-calm {
+    background: var(--gradient-calm);
+  }
+
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: var(--gradient-primary);
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--background: #0a0a0a;
-		--foreground: #ededed;
-	}
+@layer components {
+  /* Wizard card styling - unified with waitlist modal */
+  .wizard-card {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-elegant);
+  }
+
+  /* Glass effect for dark mode cards */
+  .dark .wizard-card {
+    background: hsl(261 28% 24% / 0.8);
+    backdrop-filter: blur(12px);
+    border-color: hsl(261 50% 65% / 0.22);
+  }
+
+  /* Clean input styling */
+  .wizard-input {
+    background-color: hsl(var(--input));
+    border-color: hsl(var(--border));
+  }
+
+  .wizard-input:focus {
+    --tw-ring-color: hsl(var(--ring));
+    --tw-ring-offset-width: 0px;
+    --tw-ring-width: 2px;
+    border-color: transparent;
+  }
+
+  .dark .wizard-input {
+    background: hsl(0 0% 100% / 0.06);
+    border-color: hsl(0 0% 100% / 0.14);
+  }
+
+  /* Secondary button styling */
+  .btn-secondary-outline {
+    border: 1px solid hsl(var(--primary));
+    color: hsl(var(--foreground));
+    background-color: transparent;
+  }
+
+  .btn-secondary-outline:hover {
+    background: hsl(261 100% 82% / 0.12);
+  }
+
+  /* Card styling utility */
+  .card {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Badge styling */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+
+  .badge-default {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  .badge-secondary {
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+  }
+
+  .badge-outline {
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+    background-color: transparent;
+  }
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Theme inline for Tailwind v4 */
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-glow: var(--shadow-glow);
+  --shadow-elegant: var(--shadow-elegant);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-heading: 'Space Grotesk', Inter, system-ui, sans-serif;
 }

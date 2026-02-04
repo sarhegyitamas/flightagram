@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Link } from "@/src/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Plane, Clock, Users, ArrowRight, Loader2 } from "lucide-react";
 
 interface Subscription {
   id: string;
@@ -73,6 +76,18 @@ export default function DashboardPage() {
     }
   };
 
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      scheduled: "outline",
+      departed: "secondary",
+      en_route: "default",
+      arrived: "default",
+      delayed: "secondary",
+      canceled: "destructive",
+    };
+    return variants[status.toLowerCase()] || "outline";
+  };
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       scheduled: "bg-blue-500/20 text-blue-300 border-blue-500/50",
@@ -100,8 +115,8 @@ export default function DashboardPage() {
       <main className="min-h-screen px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
-            <span className="ml-3 text-white/60">{tc("loading")}</span>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-3 text-muted-foreground">{tc("loading")}</span>
           </div>
         </div>
       </main>
@@ -112,15 +127,14 @@ export default function DashboardPage() {
     return (
       <main className="min-h-screen px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-6 text-center">
-            <p className="text-red-300">{error}</p>
-            <button
-              onClick={fetchSubscriptions}
-              className="mt-4 px-4 py-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition-all"
-            >
-              {tc("tryAgain")}
-            </button>
-          </div>
+          <Card className="bg-destructive/10 border-destructive/50">
+            <CardContent className="p-6 text-center">
+              <p className="text-destructive mb-4">{error}</p>
+              <Button onClick={fetchSubscriptions} variant="outline">
+                {tc("tryAgain")}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </main>
     );
@@ -131,111 +145,99 @@ export default function DashboardPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white font-heading">
+            <h1 className="text-3xl font-bold font-heading">
               {t("title")}
             </h1>
-            <p className="text-white/60 mt-1">{t("subtitle")}</p>
+            <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
           </div>
-          <Link
-            href="/subscriptions/create"
-            className="px-6 py-3 bg-gradient-to-r from-purple-400 to-pink-400 text-white font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            {t("addFlight")}
-          </Link>
+          <Button asChild variant="hero">
+            <Link href="/subscriptions/create">
+              <Plus className="w-5 h-5" />
+              {t("addFlight")}
+            </Link>
+          </Button>
         </div>
 
         {subscriptions.length === 0 ? (
-          <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-12 border border-white/10 text-center">
-            <div className="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
+          <Card className="p-12 text-center">
+            <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Plane className="w-10 h-10 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold text-white mb-2">{t("noFlights")}</h2>
-            <p className="text-white/60 mb-6">{t("noFlightsDesc")}</p>
-            <Link
-              href="/subscriptions/create"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-400 to-pink-400 text-white font-semibold rounded-lg hover:opacity-90 transition-all"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              {t("addFlight")}
-            </Link>
-          </div>
+            <h2 className="text-xl font-semibold mb-2">{t("noFlights")}</h2>
+            <p className="text-muted-foreground mb-6">{t("noFlightsDesc")}</p>
+            <Button asChild variant="hero">
+              <Link href="/subscriptions/create">
+                <Plus className="w-5 h-5" />
+                {t("addFlight")}
+              </Link>
+            </Button>
+          </Card>
         ) : (
           <div className="space-y-4">
             {subscriptions.map((subscription) => (
-              <div
+              <Card
                 key={subscription.id}
-                className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all"
+                className="hover:shadow-glow transition-all"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-xl font-semibold text-white">
-                        {subscription.flight.flight_number}
-                      </h3>
-                      <span
-                        className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(
-                          subscription.flight.status
-                        )}`}
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <h3 className="text-xl font-semibold font-heading">
+                          {subscription.flight.flight_number}
+                        </h3>
+                        <span
+                          className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(
+                            subscription.flight.status
+                          )}`}
+                        >
+                          {t(`status.${subscription.flight.status.toLowerCase()}`)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-6 text-foreground/80 mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="text-center">
+                            <div className="text-lg font-semibold">{subscription.flight.departure_airport}</div>
+                            <div className="text-xs text-muted-foreground">{subscription.flight.departure_airport_name}</div>
+                          </div>
+                          <ArrowRight className="w-6 h-6 text-primary" />
+                          <div className="text-center">
+                            <div className="text-lg font-semibold">{subscription.flight.arrival_airport}</div>
+                            <div className="text-xs text-muted-foreground">{subscription.flight.arrival_airport_name}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{t("departure")}: {formatDateTime(subscription.flight.scheduled_departure)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          <span>{subscription.receivers.length} {t("receivers")}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/subscriptions/${subscription.id}`}>
+                          {t("viewDetails")}
+                        </Link>
+                      </Button>
+                      <Button
+                        onClick={() => handleCancel(subscription.id)}
+                        variant="destructive"
+                        size="sm"
                       >
-                        {t(`status.${subscription.flight.status.toLowerCase()}`)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-6 text-white/80 mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="text-center">
-                          <div className="text-lg font-semibold">{subscription.flight.departure_airport}</div>
-                          <div className="text-xs text-white/50">{subscription.flight.departure_airport_name}</div>
-                        </div>
-                        <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                        <div className="text-center">
-                          <div className="text-lg font-semibold">{subscription.flight.arrival_airport}</div>
-                          <div className="text-xs text-white/50">{subscription.flight.arrival_airport_name}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-white/60">
-                      <div className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>{t("departure")}: {formatDateTime(subscription.flight.scheduled_departure)}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <span>{subscription.receivers.length} {t("receivers")}</span>
-                      </div>
+                        {t("cancel")}
+                      </Button>
                     </div>
                   </div>
-
-                  <div className="flex flex-col gap-2">
-                    <Link
-                      href={`/subscriptions/${subscription.id}`}
-                      className="px-4 py-2 bg-white/10 text-white text-sm font-medium rounded-lg hover:bg-white/20 transition-all text-center"
-                    >
-                      {t("viewDetails")}
-                    </Link>
-                    <button
-                      onClick={() => handleCancel(subscription.id)}
-                      className="px-4 py-2 bg-red-500/20 text-red-300 text-sm font-medium rounded-lg hover:bg-red-500/30 transition-all border border-red-500/30"
-                    >
-                      {t("cancel")}
-                    </button>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}

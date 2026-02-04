@@ -3,6 +3,7 @@ import '@/styles/globals.css';
 import Script from 'next/script';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { Toaster } from '@/components/ui/sonner';
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import {notFound} from 'next/navigation';
 import {routing} from '@/src/i18n/routing';
@@ -26,8 +27,8 @@ export default async function LocaleLayout({children, params}: Props) {
   }
 
   return (
-    <html>
-      <body>
+    <html lang={lang} className="dark">
+      <body className="min-h-screen bg-background text-foreground antialiased">
         <Script
           id="Cookiebot"
           src="https://consent.cookiebot.com/uc.js"
@@ -48,6 +49,7 @@ export default async function LocaleLayout({children, params}: Props) {
           <Navbar />
           {children}
           <Footer />
+          <Toaster />
         </NextIntlClientProvider>
       </body>
     </html>

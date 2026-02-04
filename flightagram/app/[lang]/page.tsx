@@ -1,6 +1,15 @@
-import { useTranslations } from 'next-intl';
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { QuickDemo } from "@/components/landing/QuickDemo";
+import { MessagePreview } from "@/components/landing/MessagePreview";
 
 export default function HomePage() {
-  const t = useTranslations('homepage');
-  return <h1>{t('hello')}</h1>;
+  return (
+    <main className="min-h-screen">
+      <Hero />
+      <Features />
+      <MessagePreview />
+      <QuickDemo />
+    </main>
+  );
 }

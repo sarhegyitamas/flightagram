@@ -95,6 +95,53 @@
   "homepage": {
     "hello": "Üdv"
   },
+  "landing": {
+    "heroTitle": "Maradjatok kapcsolatban – 10 000 méteren is.",
+    "heroSubtitle": "A Flightagram törődő, személyes frissítéseket küld a szeretteidnek utazás közben.",
+    "ctaSender": "Repülök – értesítsek valakit",
+    "ctaTracker": "Járatot követek",
+    "trustBadge": "Biztonságos • Privát • Ingyenes kezdés",
+    "ctaStart": "Kezdjük el",
+    "features": {
+      "headline": "Designed with",
+      "highlight": "care",
+      "subtitle": "Every feature is built to make staying connected feel effortless and warm",
+      "title1": "Valós idejű frissítések",
+      "body1": "Állapotváltozások megosztása stressz nélkül.",
+      "title2": "Személyes, gondoskodó üzenetek",
+      "body2": "Meleg, emberi szövegek a rideg értesítések helyett.",
+      "title3": "Családi megosztás egy kattintással",
+      "body3": "Másodpercek alatt meghívhatod a szeretteidet."
+    },
+    "previews": {
+      "title": "Messages that feel like home",
+      "subtitle": "See how your loved ones will receive your updates",
+      "chatHeader": "Repülési ",
+      "chatSubtitle": "",
+      "msg1": "💙",
+      "msg2": "🇮🇹✨",
+      "sender1": "Anna",
+      "sender2": "Dávid",
+      "msgTime1": "2 perce",
+      "msgTime2": "Most",
+      "update": " repülési státusza",
+      "yourFamilyWillGetUpdates": ""
+    },
+    "demo": {
+      "title": "Villám-demó alkotóknak",
+      "subtitle": "Játsszd le a Felszállás → Késés → Leszállás folyamatot és nézd meg az üzenet-preview-t.",
+      "ready": "Ready to simulate",
+      "play": "Demó indítása",
+      "setup": "Demó beállítása",
+      "badge": "Live Demo"
+    },
+    "footer": {
+      "about": "Rólunk",
+      "privacy": "Adatvédelem",
+      "contact": "Kapcsolat",
+      "madeWithCare": "Made with care for travelers everywhere"
+    }
+  },
   "auth": {
     "login": {
       "title": "Üdv újra",

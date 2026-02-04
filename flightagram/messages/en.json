@@ -95,6 +95,53 @@
   "homepage": {
     "hello": "Welcome"
   },
+  "landing": {
+    "heroTitle": "Stay connected — even at 30,000 feet.",
+    "heroSubtitle": "Flightagram sends thoughtful updates to your loved ones while you travel.",
+    "ctaSender": "I'm flying – notify someone",
+    "ctaTracker": "I'm tracking a flight",
+    "trustBadge": "Secure • Private • Free to start",
+    "ctaStart": "Start Now",
+    "previews": {
+      "title": "Messages that feel like home",
+      "subtitle": "See how your loved ones will receive your updates",
+      "chatHeader": "Flight Updates",
+      "chatSubtitle": "Shared with love",
+      "msg1": "Hey Mom, boarding now! I'll message once I land 💙",
+      "msg2": "Landed safely in Rome! The sunset was beautiful 🇮🇹✨",
+      "sender1": "Anna",
+      "sender2": "David",
+      "msgTime1": "2 min ago",
+      "msgTime2": "Just now",
+      "update": "'s flight update",
+      "yourFamilyWillGetUpdates": "Your family will get the next update automatically"
+    },
+    "features": {
+      "headline": "Designed with",
+      "highlight": "care",
+      "subtitle": "Every feature is built to make staying connected feel effortless and warm",
+      "title1": "Real-time flight updates",
+      "body1": "Share status changes without the stress.",
+      "title2": "Personalized, caring messages",
+      "body2": "Warm, human copy instead of cold alerts.",
+      "title3": "One-click family sharing",
+      "body3": "Invite loved ones in seconds."
+    },
+    "demo": {
+      "title": "Quick Demo for Creators",
+      "subtitle": "Watch how messages and postcards are sent automatically during your journey",
+      "ready": "Ready To Simulate",
+      "play": "Play Demo",
+      "setup": "Open Setup Demo",
+      "badge": "Live Demo"
+    },
+    "footer": {
+      "about": "About",
+      "privacy": "Privacy",
+      "contact": "Contact",
+      "madeWithCare": "Made with care for travelers everywhere"
+    }
+  },
   "auth": {
     "login": {
       "title": "Welcome Back",

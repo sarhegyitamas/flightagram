@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+
+@font-face {
+	font-family: SpaceGrotesk;
+	src: url('/assets/fonts/SpaceGrotesk.ttf');
+}
+
+@font-face {
+	font-family: Inter;
+	src: url('/assets/fonts/Inter.ttf');
+}
+
+:root {
+	--background: #ffffff;
+	--foreground: #171717;
+}
+
+@theme {
+	--font-space-grotesk: SpaceGrotesk, 'sans-serif';
+	--font-inter: Iner, 'sans-serif';
+}
+
+@theme inline {
+	--color-dark: #2a2342;
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-dark-font: #3a2d53;
+	--font-sans: var(--font-geist-sans);
+	--font-mono: var(--font-geist-mono);
+}
+
+@layer base {
+	:root {
+		--background: 261 28% 20%; /* #2A2342 deep violet */
+		--foreground: 240 14% 95%; /* #F2F2F5 light gray */
+		--foreground-body: 240 14% 95%;
+		--foreground-secondary: 240 14% 85%;
+
+		--gradient-hero: linear-gradient(145deg, #c6a4ff 0%, #ff8ec7 50%, #ffbfa9 100%);
+		--gradient-primary: linear-gradient(135deg, #c6a4ff 0%, #ff8ec7 100%);
+		--gradient-calm: linear-gradient(180deg, #2a2342 0%, #362d52 100%);
+		--gradient-logo: linear-gradient(135deg, #c6a4ff 0%, #ffbfa9 100%);
+	}
+
+	body {
+		background-color: var(--color-dark);
+		font-family: Inter, 'sans-serif';
+	}
+
+	.bg-gradient-hero {
+		background: var(--gradient-hero);
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--background: #0a0a0a;
+		--foreground: #ededed;
+	}
+}

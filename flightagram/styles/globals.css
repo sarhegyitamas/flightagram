@@ -1,13 +1,13 @@
 @import 'tailwindcss';
 
 @font-face {
-  font-family: SpaceGrotesk;
-  src: url('/assets/fonts/SpaceGrotesk.ttf');
+  font-family: 'Space Grotesk';
+  src: url('../public/assets/fonts/SpaceGrotesk.ttf');
 }
 
 @font-face {
   font-family: Inter;
-  src: url('/assets/fonts/Inter.ttf');
+  src: url('../public/assets/fonts/Inter.ttf');
 }
 
 /* Design System - All colors in HSL */
@@ -190,11 +190,6 @@
     font-family: 'Space Grotesk', Inter, system-ui, sans-serif;
   }
 
-  /* Subtle map texture background */
-  .bg-map-texture {
-    background-image: var(--map-graticule);
-  }
-
   /* Gradient utility classes */
   .bg-gradient-hero {
     background: var(--gradient-hero);
@@ -217,6 +212,13 @@
 }
 
 @layer components {
+  .bg-map-texture {
+    background-image: var(--map-graticule);
+  }
+  /* Gradient utility classes */
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
   /* Wizard card styling - unified with waitlist modal */
   .wizard-card {
     background-color: hsl(var(--card));
@@ -318,6 +320,8 @@
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
+  --color-dark: #2a2342;
+  --color-dark-font: #3a2d53;
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
   --color-popover: hsl(var(--popover));

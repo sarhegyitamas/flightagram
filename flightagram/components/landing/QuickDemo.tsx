@@ -63,7 +63,7 @@ export const QuickDemo = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12 space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
-              <MessageCircle className="w-4 h-4" />
+              <Plane className="w-4 h-4" />
               <span className="text-sm font-medium">{t("demo.badge")}</span>
             </div>
             <h2 className="text-3xl lg:text-4xl font-bold font-heading">

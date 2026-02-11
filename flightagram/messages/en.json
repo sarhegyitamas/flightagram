@@ -92,9 +92,6 @@
     "linkIsNotValid": "This unsubscribe link is not valid or has already been used.",
     "errorHeader": "Error"
   },
-  "homepage": {
-    "hello": "Welcome"
-  },
   "landing": {
     "heroTitle": "Stay connected — even at 30,000 feet.",
     "heroSubtitle": "Flightagram sends thoughtful updates to your loved ones while you travel.",

@@ -99,7 +99,8 @@ export default function Navbar() {
                                 </Link>
                                 <Link
                                     href="/auth/register"
-                                    className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-400 to-pink-400 text-white rounded-lg hover:opacity-90 transition-all"
+                                    className="px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-90 transition-all"
+                                    style={{ background: 'linear-gradient(to right, #c084fc, #f472b6)' }}
                                 >
                                     Sign up
                                 </Link>
@@ -109,29 +110,24 @@ export default function Navbar() {
                 )}
 
                 {/* Language Toggle */}
-                <div className="relative flex bg-white/10 rounded-full p-1 w-26 h-8 cursor-pointer select-none transition-all duration-300 ease-in-out">
-                    <div
-                        className={`absolute top-1 left-1 w-12 h-6 rounded-full bg-white/20 backdrop-blur-md transition-all duration-300 ease-in-out ${
-                            lang === "hu" ? "translate-x-12" : "translate-x-0"
-                        }`}
-                    />
-                    <button
-                        onClick={() => changeLang("en")}
-                        className={`flex-1 text-sm font-semibold z-10 transition-all duration-200 cursor-pointer ${
-                            lang === "en" ? "text-white" : "text-white/60"
-                        }`}
-                    >
+                <div className="flex gap-1 bg-muted/50 rounded-full p-1">
+                      <Button
+                        variant={locale === 'en' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => changeLang('en')}
+                        className="rounded-full px-3 h-8 text-xs font-medium"
+                      >
                         EN
-                    </button>
-                    <button
-                        onClick={() => changeLang("hu")}
-                        className={`flex-1 text-sm font-semibold z-10 transition-all duration-200 cursor-pointer ${
-                            lang === "hu" ? "text-white" : "text-white/60"
-                        }`}
-                    >
+                      </Button>
+                      <Button
+                        variant={locale === 'hu' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => changeLang('hu')}
+                        className="rounded-full px-3 h-8 text-xs font-medium"
+                      >
                         HU
-                    </button>
-                </div>
+                      </Button>
+                    </div>
             </div>
         </nav>
     );

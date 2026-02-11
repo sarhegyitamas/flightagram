@@ -18,12 +18,6 @@ export const Hero = () => {
       {/* Hero Content */}
       <div className="container mx-auto px-4 py-20 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary">
-            <Plane className="w-4 h-4" />
-            <span className="text-sm font-medium">{t("trustBadge")}</span>
-          </div>
-
           {/* Hero Title with gradient text */}
           <h1 className="text-5xl md:text-7xl font-bold leading-tight font-heading">
             <span className="text-gradient block mb-2">
@@ -61,7 +55,7 @@ export const Hero = () => {
             </Button>
           </div>
           <p className="text-sm text-muted-foreground pt-4">
-            {t('trustBadge')}
+            ✨ {t('trustBadge')}
           </p>
         </div>
       </div>

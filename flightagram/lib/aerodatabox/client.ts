@@ -14,7 +14,7 @@ import type {
 } from './types';
 
 // Configuration
-const DEFAULT_BASE_URL = 'https://aerodatabox.p.api.market/api';
+const DEFAULT_BASE_URL = 'https://prod.api.market/api/v1/aedbx/aerodatabox';
 const MOCK_MODE = !process.env.AERODATABOX_API_KEY;
 
 interface ADBClientConfig {
@@ -56,13 +56,18 @@ class AeroDataBoxClient {
     try {
       logger.debug('AeroDataBox API request', { url, method });
 
+      const requestHeaders: Record<string, string> = {
+        'accept': 'application/json',
+        'X-MAGICAPI-Key': this.apiKey,
+        ...headers,
+      };
+      if (body) {
+        requestHeaders['Content-Type'] = 'application/json';
+      }
+
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey,
-          ...headers,
-        },
+        headers: requestHeaders,
         body: body ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });

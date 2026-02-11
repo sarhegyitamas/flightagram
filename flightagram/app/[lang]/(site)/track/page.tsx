@@ -51,6 +51,7 @@ export default function TrackFlightPage() {
 
       const data = await response.json();
 
+      console.log(data);
       if (data.flights && data.flights.length > 0) {
         setFlight(data.flights[0]);
       } else {

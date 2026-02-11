@@ -32,17 +32,6 @@ const createSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verify authentication
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     // Parse query parameters
     const { searchParams } = new URL(request.url);
     const flightNumber = searchParams.get('flight_number');

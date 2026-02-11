@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import '@/styles/globals.css';
 import Script from 'next/script';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { Toaster } from '@/components/ui/sonner';
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import {notFound} from 'next/navigation';
@@ -13,14 +11,12 @@ export const metadata: Metadata = {
   description: "Connect...",
 };
 
- 
 type Props = {
   children: React.ReactNode;
   params: Promise<{lang: string}>;
 };
 
 export default async function LocaleLayout({children, params}: Props) {
-  // Ensure that the incoming `lang` is valid
   const {lang} = await params;
   if (!hasLocale(routing.locales, lang)) {
     notFound();
@@ -46,9 +42,7 @@ export default async function LocaleLayout({children, params}: Props) {
         <Script src="/scripts/script.js" strategy="beforeInteractive" />
 
         <NextIntlClientProvider>
-          <Navbar />
           {children}
-          <Footer />
           <Toaster />
         </NextIntlClientProvider>
       </body>

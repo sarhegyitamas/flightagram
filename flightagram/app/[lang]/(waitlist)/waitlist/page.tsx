@@ -145,8 +145,6 @@ export default function WaitlistPage() {
                 );
             })}
 
-            <Footer />
-
             {showModal && <Modal setShowModal={setShowModal} />}
         </div>
     );

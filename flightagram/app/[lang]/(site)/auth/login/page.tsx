@@ -32,15 +32,16 @@ export default function LoginPage() {
     }
   };
 
-  const handleOAuthLogin = async (provider: "google" | "github") => {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    });
-  };
+  // TODO: Re-enable OAuth login when ready
+  // const handleOAuthLogin = async (provider: "google" | "github") => {
+  //   const supabase = createClient();
+  //   await supabase.auth.signInWithOAuth({
+  //     provider,
+  //     options: {
+  //       redirectTo: `${window.location.origin}/api/auth/callback`,
+  //     },
+  //   });
+  // };
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-12">
@@ -99,6 +100,7 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* TODO: Re-enable OAuth login when ready
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-white/20"></div>
@@ -132,6 +134,7 @@ export default function LoginPage() {
               {t("login.github")}
             </button>
           </div>
+          */}
 
           <p className="text-center text-white/60 mt-8">
             {t("login.noAccount")}{" "}

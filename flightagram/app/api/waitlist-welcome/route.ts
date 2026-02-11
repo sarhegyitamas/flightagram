@@ -28,9 +28,12 @@ export async function POST(request: NextRequest) {
       .from('EmailTemplate')
       .select('*')
       .eq('name', 'Welcome Email')
-      .single();
+      .maybeSingle();
 
     if (templateError || !template) {
+      console.log(templateError);
+      console.log(template);
+
       return NextResponse.json({ error: 'EmailTemplate not found' }, { status: 500 });
     }
 
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
       data: {
         current_year: new Date().getFullYear(),
         name: subscriber.firstname ?? 'traveler',
-        unsubscribe_link: `https://flightagram.com/unsubscribe?token=${subscriber.unsubscribe_token}`,
+        unsubscribe_link: `https://flightagram.com/unsubscribe?token=${subscriber.unsubscribeToken}`,
       },
     });
 

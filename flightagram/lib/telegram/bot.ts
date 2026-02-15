@@ -65,6 +65,8 @@ If you already have a link, click it to start receiving updates!`;
       .from('receivers')
       .update({
         telegram_chat_id: chatId,
+        telegram_opted_in: true,
+        telegram_username: username || null,
       })
       .eq('id', link.receiver_id);
 
@@ -93,6 +95,8 @@ Send /stop at any time to unsubscribe.`;
     .from('receivers')
     .update({
       telegram_chat_id: chatId,
+      telegram_opted_in: true,
+      telegram_username: username || null,
     })
     .eq('id', link.receiver_id);
 
@@ -150,6 +154,12 @@ async function handleStopCommand(command: ParsedWebhookCommand): Promise<string>
     logger.error('Failed to unsubscribe', { receiverId: receiver.id }, error);
     return `Sorry, something went wrong. Please try again later.`;
   }
+
+  // Mark receiver as no longer opted in
+  await supabase
+    .from('receivers')
+    .update({ telegram_opted_in: false })
+    .eq('id', receiver.id);
 
   const count = links?.length || 0;
 

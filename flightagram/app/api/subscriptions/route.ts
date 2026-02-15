@@ -12,6 +12,7 @@ import { generateOptInToken } from '@/lib/utils/idempotency';
 import { telegramAdapter } from '@/lib/telegram/adapter';
 import { z } from 'zod';
 import type { Database } from '@/types/database';
+import type { SubscriptionWithJoins } from '@/types/subscriptions';
 
 type TravellerRow = Database['public']['Tables']['travellers']['Row'];
 type ReceiverRow = Database['public']['Tables']['receivers']['Row'];
@@ -53,7 +54,7 @@ export async function GET() {
     }
 
     // Get subscriptions with flight data
-    const { data: subscriptions, error } = await supabase
+    const { data, error } = await supabase
       .from('flight_subscriptions')
       .select(`
         *,
@@ -66,11 +67,26 @@ export async function GET() {
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
+    const subscriptions = (data || []) as unknown as SubscriptionWithJoins[];
+
     if (error) {
       throw error;
     }
 
-    return NextResponse.json({ subscriptions: subscriptions || [] });
+    // Transform to match the frontend's expected shape:
+    // - "flights" (table name) → "flight" (singular)
+    // - flatten subscription_receivers.receivers → receivers
+    const transformed = subscriptions.map((sub) => ({
+      ...sub,
+      flight: sub.flights,
+      flights: undefined,
+      receivers: (sub.subscription_receivers || []).map(
+        (sr) => sr.receivers
+      ),
+      subscription_receivers: undefined,
+    }));
+
+    return NextResponse.json({ subscriptions: transformed });
   } catch (error) {
     console.error('List subscriptions error:', error);
     return NextResponse.json(

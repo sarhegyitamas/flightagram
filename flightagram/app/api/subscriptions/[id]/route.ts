@@ -7,10 +7,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { cancelSubscription } from '@/lib/flights/tracker';
-
-interface TravellerRef {
-  user_id: string;
-}
+import { telegramAdapter } from '@/lib/telegram/adapter';
+import type { SubscriptionWithJoins, TravellerRef } from '@/types/subscriptions';
 
 /**
  * GET /api/subscriptions/[id] - Get subscription details
@@ -33,7 +31,7 @@ export async function GET(
     }
 
     // Get subscription with related data
-    const { data: subscription, error } = await supabase
+    const { data, error } = await supabase
       .from('flight_subscriptions')
       .select(`
         *,
@@ -46,6 +44,8 @@ export async function GET(
       .eq('id', id)
       .single();
 
+    const subscription = data as unknown as SubscriptionWithJoins | null;
+
     if (error || !subscription) {
       return NextResponse.json(
         { error: 'Subscription not found' },
@@ -53,9 +53,8 @@ export async function GET(
       );
     }
 
-    // Verify ownership - travellers is an array from join
-    const travellers = subscription.travellers as unknown as TravellerRef | TravellerRef[];
-    const travellerUserId = Array.isArray(travellers) ? travellers[0]?.user_id : travellers?.user_id;
+    // Verify ownership
+    const travellerUserId = subscription.travellers?.user_id || null;
 
     if (travellerUserId !== user.id) {
       return NextResponse.json(
@@ -71,8 +70,41 @@ export async function GET(
       .eq('subscription_id', id)
       .order('scheduled_for', { ascending: true });
 
+    // Get opt-in status and tokens from traveller_receiver_links
+    const receiverIds = (subscription.subscription_receivers || []).map(
+      (sr) => sr.receivers.id
+    );
+    const { data: links } = await supabase
+      .from('traveller_receiver_links')
+      .select('receiver_id, opt_in_status, opt_in_token')
+      .eq('traveller_id', subscription.traveller_id)
+      .in('receiver_id', receiverIds);
+
+    const linksByReceiverId = new Map(
+      (links || []).map((link) => [link.receiver_id, link])
+    );
+
+    // Return flight and receivers as top-level fields
+    // (the detail page destructures { subscription, flight, receivers, messages })
     return NextResponse.json({
-      subscription,
+      subscription: {
+        id: subscription.id,
+        traveller_name: subscription.traveller_name,
+        is_active: subscription.is_active,
+        created_at: subscription.created_at,
+      },
+      flight: subscription.flights,
+      receivers: (subscription.subscription_receivers || []).map((sr) => {
+        const link = linksByReceiverId.get(sr.receivers.id);
+        return {
+          id: sr.receivers.id,
+          display_name: sr.receivers.display_name,
+          opt_in_status: link?.opt_in_status || 'PENDING',
+          opt_in_url: link?.opt_in_token
+            ? telegramAdapter.generateOptInLink(link.opt_in_token)
+            : '',
+        };
+      }),
       messages: messages || [],
     });
   } catch (error) {
@@ -105,7 +137,7 @@ export async function DELETE(
     }
 
     // Verify ownership
-    const { data: subscription, error } = await supabase
+    const { data: deleteData, error } = await supabase
       .from('flight_subscriptions')
       .select(`
         id,
@@ -114,6 +146,8 @@ export async function DELETE(
       .eq('id', id)
       .single();
 
+    const subscription = deleteData as unknown as { id: string; travellers: TravellerRef } | null;
+
     if (error || !subscription) {
       return NextResponse.json(
         { error: 'Subscription not found' },
@@ -121,8 +155,7 @@ export async function DELETE(
       );
     }
 
-    const travellers = subscription.travellers as unknown as TravellerRef | TravellerRef[];
-    const travellerUserId = Array.isArray(travellers) ? travellers[0]?.user_id : travellers?.user_id;
+    const travellerUserId = subscription.travellers.user_id;
 
     if (travellerUserId !== user.id) {
       return NextResponse.json(

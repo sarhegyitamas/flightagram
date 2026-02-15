@@ -49,6 +49,8 @@ export interface Traveller {
 export interface Receiver {
   id: string;
   telegram_chat_id: number | null;
+  telegram_opted_in: boolean;
+  telegram_username: string | null;
   display_name: string;
   created_at: string;
   updated_at: string;

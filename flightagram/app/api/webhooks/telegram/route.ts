@@ -58,12 +58,14 @@ export async function POST(request: NextRequest) {
       username: command.username,
     });
 
-    // Handle the command asynchronously
-    // We respond immediately to Telegram and process in the background
-    // to avoid timeout issues
-    handleTelegramCommand(command).catch((error) => {
+    // Handle the command and wait for it to complete
+    // Next.js serverless functions terminate after the response is sent,
+    // so we must await the handler before responding
+    try {
+      await handleTelegramCommand(command);
+    } catch (error) {
       logger.error('Command handler error', { requestId, command }, error);
-    });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {

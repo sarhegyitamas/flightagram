@@ -172,7 +172,7 @@ export default function CreateSubscriptionPage() {
             <div className="space-y-4 mb-8">
               {created.receivers.map((receiver, index) => (
                 <div
-                  key={receiver.id}
+                  key={index}
                   className="bg-white/5 rounded-xl p-4 border border-white/10"
                 >
                   <div className="flex items-center justify-between mb-2">

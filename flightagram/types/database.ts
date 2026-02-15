@@ -42,11 +42,14 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       receivers: {
         Row: {
           id: string;
           telegram_chat_id: number | null;
+          telegram_opted_in: boolean;
+          telegram_username: string | null;
           display_name: string;
           created_at: string;
           updated_at: string;
@@ -54,6 +57,8 @@ export type Database = {
         Insert: {
           id?: string;
           telegram_chat_id?: number | null;
+          telegram_opted_in?: boolean;
+          telegram_username?: string | null;
           display_name: string;
           created_at?: string;
           updated_at?: string;
@@ -61,10 +66,13 @@ export type Database = {
         Update: {
           id?: string;
           telegram_chat_id?: number | null;
+          telegram_opted_in?: boolean;
+          telegram_username?: string | null;
           display_name?: string;
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       traveller_receiver_links: {
         Row: {
@@ -97,6 +105,22 @@ export type Database = {
           opted_in_at?: string | null;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'traveller_receiver_links_traveller_id_fkey';
+            columns: ['traveller_id'];
+            isOneToOne: false;
+            referencedRelation: 'travellers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'traveller_receiver_links_receiver_id_fkey';
+            columns: ['receiver_id'];
+            isOneToOne: false;
+            referencedRelation: 'receivers';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       flights: {
         Row: {
@@ -168,6 +192,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       flight_subscriptions: {
         Row: {
@@ -203,6 +228,22 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'flight_subscriptions_traveller_id_fkey';
+            columns: ['traveller_id'];
+            isOneToOne: false;
+            referencedRelation: 'travellers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'flight_subscriptions_flight_id_fkey';
+            columns: ['flight_id'];
+            isOneToOne: false;
+            referencedRelation: 'flights';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       subscription_receivers: {
         Row: {
@@ -223,6 +264,22 @@ export type Database = {
           receiver_id?: string;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'subscription_receivers_subscription_id_fkey';
+            columns: ['subscription_id'];
+            isOneToOne: false;
+            referencedRelation: 'flight_subscriptions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'subscription_receivers_receiver_id_fkey';
+            columns: ['receiver_id'];
+            isOneToOne: false;
+            referencedRelation: 'receivers';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       messages: {
         Row: {
@@ -273,6 +330,22 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'messages_subscription_id_fkey';
+            columns: ['subscription_id'];
+            isOneToOne: false;
+            referencedRelation: 'flight_subscriptions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'messages_receiver_id_fkey';
+            columns: ['receiver_id'];
+            isOneToOne: false;
+            referencedRelation: 'receivers';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       message_events: {
         Row: {
@@ -305,6 +378,15 @@ export type Database = {
           metadata?: Json | null;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'message_events_message_id_fkey';
+            columns: ['message_id'];
+            isOneToOne: false;
+            referencedRelation: 'messages';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       webhook_events: {
         Row: {
@@ -343,6 +425,15 @@ export type Database = {
           error_message?: string | null;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'webhook_events_flight_id_fkey';
+            columns: ['flight_id'];
+            isOneToOne: false;
+            referencedRelation: 'flights';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       scheduler_locks: {
         Row: {
@@ -363,6 +454,7 @@ export type Database = {
           locked_by?: string | null;
           expires_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: {};

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plane, Users, Bell } from "lucide-react";
+import { MessageCircleHeart, Sparkles, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export const Features = () => {
@@ -8,19 +8,19 @@ export const Features = () => {
 
   const features = [
     {
-      icon: Plane,
+      icon: MessageCircleHeart,
       title: t("features.title1"),
       description: t("features.body1"),
       color: "from-blue-500/20 to-purple-500/20"
     },
     {
-      icon: Users,
+      icon: Sparkles,
       title: t("features.title2"),
       description: t("features.body2"),
       color: "from-purple-500/20 to-pink-500/20"
     },
     {
-      icon: Bell,
+      icon: Users,
       title: t("features.title3"),
       description: t("features.body3"),
       color: "from-pink-500/20 to-orange-500/20"
@@ -28,7 +28,7 @@ export const Features = () => {
   ];
 
   return (
-    <section id="features" className="py-24 bg-background">
+    <section id="features" className="py-24 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-4xl font-bold font-heading">
@@ -50,8 +50,8 @@ export const Features = () => {
                 key={index}
                 className="bg-card p-8 rounded-2xl shadow-soft hover:shadow-glow transition-all group border border-border"
               >
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-8 h-8 text-primary" />
+                <div className={`w-16 h-16 rounded-2xl ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  <Icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3 font-heading">{feature.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{feature.description}</p>

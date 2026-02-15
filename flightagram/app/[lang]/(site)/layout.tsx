@@ -1,4 +1,4 @@
-import Navbar from '@/components/Navbar';
+
 import Footer from '@/components/Footer';
 
 type Props = {
@@ -8,7 +8,6 @@ type Props = {
 export default function SiteLayout({children}: Props) {
   return (
     <>
-      <Navbar />
       {children}
       <Footer />
     </>

@@ -130,7 +130,14 @@
       "ready": "Ready To Simulate",
       "play": "Play Demo",
       "setup": "Open Setup Demo",
-      "badge": "Live Demo"
+      "instantNotification": "Instant notification sent to your loved ones",
+      "badge": "Live Demo",
+      "departing": "Departing",
+      "inFlight": "In Flight",
+      "landed": "Landed",
+      "postcardInFlight": "Digital Postcard sent from in-flight",
+      "postcardBackToYou": "Landing postcard sent back to you",
+      "asd": "AS"
     },
     "footer": {
       "about": "About",

@@ -129,8 +129,15 @@
       "subtitle": "Játsszd le a Felszállás → Késés → Leszállás folyamatot és nézd meg az üzenet-preview-t.",
       "ready": "Ready to simulate",
       "play": "Demó indítása",
+      "instantNotification": "Instant notification sent to your loved ones",
       "setup": "Demó beállítása",
-      "badge": "Live Demo"
+      "badge": "Live Demo",
+      "departing": "Departing",
+      "inFlight": "In Flight",
+      "landed": "Landed",
+      "postcardInFlight": "Digital Postcard sent from in-flight",
+      "postcardBackToYou": "Landing postcard sent back to you",
+      "asd": ""
     },
     "footer": {
       "about": "Rólunk",

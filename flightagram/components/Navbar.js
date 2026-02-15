@@ -4,6 +4,7 @@ import { Logo } from "./Logo";
 import { useLocale } from "next-intl";
 import { useRouter, usePathname, Link } from "@/src/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
     const locale = useLocale();
@@ -44,10 +45,8 @@ export default function Navbar() {
         router.push("/");
     };
 
-    const lang = locale;
-
     return (
-        <nav className="flex justify-between items-center px-6 py-4 bg-dark text-white">
+        <nav className={`flex justify-between items-center px-6 py-4 text-white`}>
             <div className="flex items-center gap-8">
                 <Logo showText={true} />
 

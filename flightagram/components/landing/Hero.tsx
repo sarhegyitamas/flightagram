@@ -4,10 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Plane, Eye } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export const Hero = () => {
   const t = useTranslations("landing");
   const locale = useLocale();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+    });
+  }, []);
 
   return (
     <div className="bg-gradient-calm bg-map-texture overflow-hidden">
@@ -40,7 +50,7 @@ export const Hero = () => {
                 variant="hero"
                 className="text-lg px-10 h-16 min-w-[280px]"
               >
-                <Link href={`/${locale}/auth/register`}>
+                <Link href={isLoggedIn ? `/${locale}/dashboard` : `/${locale}/auth/register`}>
                   <Plane className="w-6 h-6" />
                   {t("ctaSender")}
                 </Link>

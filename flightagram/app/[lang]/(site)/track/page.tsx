@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plane, Search, Loader2, Send } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 
 interface Flight {
   flight_number: string;
@@ -93,6 +94,8 @@ export default function TrackFlightPage() {
   };
 
   return (
+    <>
+    <PageHeader />
     <main className="min-h-screen px-4 py-12">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
@@ -261,5 +264,6 @@ export default function TrackFlightPage() {
         )}
       </div>
     </main>
+    </>
   );
 }

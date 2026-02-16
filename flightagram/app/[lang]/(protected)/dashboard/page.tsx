@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Plane, Clock, Users, ArrowRight, Loader2 } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 
 interface Subscription {
   id: string;
@@ -111,35 +112,43 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-3 text-muted-foreground">{tc("loading")}</span>
+      <>
+        <PageHeader />
+        <main className="min-h-screen px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-3 text-muted-foreground">{tc("loading")}</span>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </>
     );
   }
 
   if (error) {
     return (
-      <main className="min-h-screen px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <Card className="bg-destructive/10 border-destructive/50">
-            <CardContent className="p-6 text-center">
-              <p className="text-destructive mb-4">{error}</p>
-              <Button onClick={fetchSubscriptions} variant="outline">
-                {tc("tryAgain")}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+      <>
+        <PageHeader />
+        <main className="min-h-screen px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            <Card className="bg-destructive/10 border-destructive/50">
+              <CardContent className="p-6 text-center">
+                <p className="text-destructive mb-4">{error}</p>
+                <Button onClick={fetchSubscriptions} variant="outline">
+                  {tc("tryAgain")}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </>
     );
   }
 
   return (
+    <>
+    <PageHeader />
     <main className="min-h-screen px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
@@ -242,5 +251,6 @@ export default function DashboardPage() {
         )}
       </div>
     </main>
+    </>
   );
 }

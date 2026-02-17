@@ -175,7 +175,9 @@
       "passwordTooShort": "A jelszónak legalább 6 karakternek kell lennie",
       "checkEmail": "Ellenőrizd az e-mail fiókodat",
       "confirmationSent": "Küldtünk egy megerősítő linket. Kérjük, ellenőrizd az e-mail fiókodat a fiókod aktiválásához.",
-      "backToLogin": "Vissza a bejelentkezéshez"
+      "backToLogin": "Vissza a bejelentkezéshez",
+      "acceptTerms": "Elfogadom az <link>Általános Szerződési Feltételeket</link>",
+      "mustAcceptTerms": "A regisztrációhoz el kell fogadnod az Általános Szerződési Feltételeket"
     }
   },
   "dashboard": {

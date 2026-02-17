@@ -175,7 +175,9 @@
       "passwordTooShort": "Password must be at least 6 characters",
       "checkEmail": "Check your email",
       "confirmationSent": "We've sent you a confirmation link. Please check your email to verify your account.",
-      "backToLogin": "Back to Login"
+      "backToLogin": "Back to Login",
+      "acceptTerms": "I accept the <link>Terms and Conditions</link>",
+      "mustAcceptTerms": "You must accept the Terms and Conditions to register"
     }
   },
   "dashboard": {

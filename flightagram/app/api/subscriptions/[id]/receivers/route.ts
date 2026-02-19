@@ -8,6 +8,9 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { generateOptInToken } from '@/lib/utils/idempotency';
 import { telegramAdapter } from '@/lib/telegram/adapter';
+import { emailAdapter } from '@/lib/email/adapter';
+import { sendHTMLEmail } from '@/lib/email/sender';
+import { buildConfirmationEmailHTML } from '@/lib/email/templates';
 import { scheduleMessagesForSubscription } from '@/lib/messages/dispatcher';
 import { z } from 'zod';
 import type { Flight } from '@/types';
@@ -20,6 +23,8 @@ interface TravellerRef {
 // Add receiver request schema
 const addReceiverSchema = z.object({
   display_name: z.string().min(1).max(100),
+  channel: z.enum(['TELEGRAM', 'EMAIL']).default('TELEGRAM'),
+  email_address: z.string().email().optional(),
 });
 
 /**
@@ -60,6 +65,7 @@ export async function POST(
         id,
         flight_id,
         traveller_id,
+        traveller_name,
         travellers!inner(id, user_id),
         flights!inner(*)
       `)
@@ -97,12 +103,16 @@ export async function POST(
     }
 
     const adminClient = createAdminClient();
+    const channel = result.data.channel || 'TELEGRAM';
 
     // Create receiver
     const { data: receiver, error: receiverError } = await adminClient
       .from('receivers')
       .insert({
         display_name: result.data.display_name,
+        ...(channel === 'EMAIL' && result.data.email_address
+          ? { email_address: result.data.email_address }
+          : {}),
       })
       .select()
       .single();
@@ -119,7 +129,7 @@ export async function POST(
         traveller_id: traveller.id,
         receiver_id: receiver.id,
         opt_in_token: optInToken,
-        channel: 'TELEGRAM',
+        channel,
       })
       .select()
       .single();
@@ -148,12 +158,33 @@ export async function POST(
       flight
     );
 
-    const optInUrl = telegramAdapter.generateOptInLink(optInToken);
+    // Generate channel-appropriate opt-in URL
+    const optInUrl = channel === 'EMAIL'
+      ? emailAdapter.generateOptInLink(optInToken)
+      : telegramAdapter.generateOptInLink(optInToken);
+
+    // For EMAIL channel, send confirmation email
+    if (channel === 'EMAIL' && result.data.email_address) {
+      const travellerName = subscription.traveller_name || '';
+      const confirmEmail = buildConfirmationEmailHTML(
+        result.data.display_name,
+        travellerName,
+        optInUrl
+      );
+      await sendHTMLEmail({
+        to: result.data.email_address,
+        toName: result.data.display_name,
+        subject: confirmEmail.subject,
+        htmlBody: confirmEmail.html,
+        textBody: confirmEmail.text,
+      });
+    }
 
     return NextResponse.json({
       receiver,
       link,
       opt_in_url: optInUrl,
+      channel,
     }, { status: 201 });
   } catch (error) {
     console.error('Add receiver error:', error);

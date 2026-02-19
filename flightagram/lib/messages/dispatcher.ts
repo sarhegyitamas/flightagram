@@ -7,8 +7,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { messageLogger as logger } from '@/lib/logging';
 import { getAdapter } from '@/lib/channels/types';
 import { generateMessageContent } from './templates';
+import { buildFlightEmailHTML } from '@/lib/email/templates';
 import type { MessageContext } from './types';
-import type { Message, Receiver, Flight, FlightSubscription, ChannelType } from '@/types';
+import type { Message, Receiver, Flight, FlightSubscription, ChannelType, MessageType } from '@/types';
 
 interface DispatchResult {
   success: boolean;
@@ -63,10 +64,10 @@ export async function dispatchMessage(
   message: Message,
   receiver: Receiver,
   subscription: FlightSubscription,
-  flight: Flight,
-  channel: ChannelType = 'TELEGRAM'
+  flight: Flight
 ): Promise<DispatchResult> {
   const supabase = createAdminClient();
+  const channel: ChannelType = message.channel || 'TELEGRAM';
 
   // Check idempotency - has this exact message been sent?
   if (message.status === 'SENT') {
@@ -81,20 +82,29 @@ export async function dispatchMessage(
     return { success: false, error: `No adapter for channel: ${channel}` };
   }
 
-  // Check receiver has opted in and has chat ID
-  if (!receiver.telegram_chat_id) {
-    logger.warn('Receiver has no chat ID', { receiverId: receiver.id });
-
-    // Skip this message
-    await supabase
-      .from('messages')
-      .update({
-        status: 'SKIPPED',
-        skip_reason: 'Receiver has not opted in or no chat ID',
-      })
-      .eq('id', message.id);
-
-    return { success: false, error: 'Receiver not opted in' };
+  // Check receiver readiness per channel
+  let recipientId: string | number;
+  if (channel === 'EMAIL') {
+    if (!receiver.email_address || !receiver.email_opted_in) {
+      logger.warn('Receiver has no email or not opted in', { receiverId: receiver.id });
+      await supabase
+        .from('messages')
+        .update({ status: 'SKIPPED', skip_reason: 'Receiver has not opted in via email' })
+        .eq('id', message.id);
+      return { success: false, error: 'Receiver not opted in via email' };
+    }
+    recipientId = receiver.email_address;
+  } else {
+    // TELEGRAM (and future WHATSAPP)
+    if (!receiver.telegram_chat_id) {
+      logger.warn('Receiver has no chat ID', { receiverId: receiver.id });
+      await supabase
+        .from('messages')
+        .update({ status: 'SKIPPED', skip_reason: 'Receiver has not opted in or no chat ID' })
+        .eq('id', message.id);
+      return { success: false, error: 'Receiver not opted in' };
+    }
+    recipientId = receiver.telegram_chat_id;
   }
 
   // Generate message content
@@ -102,7 +112,12 @@ export async function dispatchMessage(
   let content: string;
 
   try {
-    content = generateMessageContent(message.message_type, context);
+    if (channel === 'EMAIL') {
+      const emailContent = buildFlightEmailHTML(message.message_type, context);
+      content = JSON.stringify(emailContent);
+    } else {
+      content = generateMessageContent(message.message_type, context);
+    }
   } catch (error) {
     logger.error('Failed to generate message content', { messageId: message.id }, error);
     return { success: false, error: 'Failed to generate content' };
@@ -114,25 +129,24 @@ export async function dispatchMessage(
     .update({ content })
     .eq('id', message.id);
 
-  // Send the message (telegram_chat_id is guaranteed non-null after the check above)
-  const chatId = receiver.telegram_chat_id!;
   logger.info('Dispatching message', {
     messageId: message.id,
     type: message.message_type,
+    channel,
     receiverId: receiver.id,
-    chatId,
+    recipientId,
   });
 
-  const result = await adapter.sendMessage(chatId, content);
+  const result = await adapter.sendMessage(recipientId, content);
 
   // Record the attempt
   await supabase.from('message_events').insert({
     message_id: message.id,
     event_type: result.success ? 'SENT' : 'FAILED',
-    telegram_message_id: result.messageId ? parseInt(result.messageId, 10) : null,
+    provider_message_id: result.messageId || null,
     error_message: result.error || null,
     error_code: result.errorCode || null,
-    metadata: { channel, chatId } as Record<string, unknown>,
+    metadata: { channel, recipientId: String(recipientId) },
   });
 
   // Update message status
@@ -148,7 +162,7 @@ export async function dispatchMessage(
 
     logger.info('Message sent successfully', {
       messageId: message.id,
-      telegramMessageId: result.messageId,
+      providerMessageId: result.messageId,
     });
 
     return { success: true, messageId: result.messageId };

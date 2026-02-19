@@ -29,6 +29,7 @@ interface SubscriptionDetails {
   receivers: Array<{
     id: string;
     display_name: string;
+    channel: string;
     opt_in_status: string;
     opt_in_url: string;
   }>;
@@ -53,6 +54,8 @@ export default function SubscriptionDetailsPage({
   const [error, setError] = useState<string | null>(null);
   const [addingReceiver, setAddingReceiver] = useState(false);
   const [newReceiverName, setNewReceiverName] = useState("");
+  const [newReceiverChannel, setNewReceiverChannel] = useState<"TELEGRAM" | "EMAIL">("TELEGRAM");
+  const [newReceiverEmail, setNewReceiverEmail] = useState("");
   const [showAddReceiver, setShowAddReceiver] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -86,10 +89,18 @@ export default function SubscriptionDetailsPage({
 
     setAddingReceiver(true);
     try {
+      const body: Record<string, string> = {
+        display_name: newReceiverName,
+        channel: newReceiverChannel,
+      };
+      if (newReceiverChannel === "EMAIL" && newReceiverEmail) {
+        body.email_address = newReceiverEmail;
+      }
+
       const response = await fetch(`/api/subscriptions/${id}/receivers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ display_name: newReceiverName }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -97,6 +108,8 @@ export default function SubscriptionDetailsPage({
       }
 
       setNewReceiverName("");
+      setNewReceiverChannel("TELEGRAM");
+      setNewReceiverEmail("");
       setShowAddReceiver(false);
       fetchDetails();
     } catch (err) {
@@ -294,7 +307,7 @@ export default function SubscriptionDetailsPage({
           </div>
 
           {showAddReceiver && (
-            <form onSubmit={handleAddReceiver} className="mb-4 p-4 bg-white/5 rounded-lg">
+            <form onSubmit={handleAddReceiver} className="mb-4 p-4 bg-white/5 rounded-lg space-y-3">
               <div className="flex items-center gap-3">
                 <input
                   type="text"
@@ -318,6 +331,39 @@ export default function SubscriptionDetailsPage({
                   {tc("close")}
                 </button>
               </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setNewReceiverChannel("TELEGRAM")}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
+                    newReceiverChannel === "TELEGRAM"
+                      ? "bg-purple-500/30 text-purple-300 border border-purple-500/50"
+                      : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
+                  }`}
+                >
+                  Telegram
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNewReceiverChannel("EMAIL")}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
+                    newReceiverChannel === "EMAIL"
+                      ? "bg-purple-500/30 text-purple-300 border border-purple-500/50"
+                      : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
+                  }`}
+                >
+                  Email
+                </button>
+              </div>
+              {newReceiverChannel === "EMAIL" && (
+                <input
+                  type="email"
+                  value={newReceiverEmail}
+                  onChange={(e) => setNewReceiverEmail(e.target.value)}
+                  placeholder="e.g. mom@example.com"
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                />
+              )}
             </form>
           )}
 
@@ -334,7 +380,12 @@ export default function SubscriptionDetailsPage({
                     </span>
                   </div>
                   <div>
-                    <div className="text-white font-medium">{receiver.display_name}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-medium">{receiver.display_name}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/50">
+                        {receiver.channel === "EMAIL" ? "Email" : "Telegram"}
+                      </span>
+                    </div>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${getOptInStatusColor(receiver.opt_in_status)}`}
                     >

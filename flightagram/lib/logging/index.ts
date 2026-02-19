@@ -164,3 +164,4 @@ export const webhookLogger = createLogger({ module: 'webhook' });
 export const telegramLogger = createLogger({ module: 'telegram' });
 export const aeroDataBoxLogger = createLogger({ module: 'aerodatabox' });
 export const messageLogger = createLogger({ module: 'message' });
+export const emailLogger = createLogger({ module: 'email' });

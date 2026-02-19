@@ -7,7 +7,7 @@
 // Enums (match database enums)
 // =============================================================================
 
-export type ChannelType = 'TELEGRAM' | 'WHATSAPP';
+export type ChannelType = 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
 
 export type FlightStatus =
   | 'SCHEDULED'
@@ -51,6 +51,8 @@ export interface Receiver {
   telegram_chat_id: number | null;
   telegram_opted_in: boolean;
   telegram_username: string | null;
+  email_address: string | null;
+  email_opted_in: boolean;
   display_name: string;
   created_at: string;
   updated_at: string;
@@ -116,6 +118,7 @@ export interface Message {
   receiver_id: string;
   message_type: MessageType;
   status: MessageStatus;
+  channel: ChannelType;
   scheduled_for: string | null;
   content: string | null;
   sent_at: string | null;
@@ -131,7 +134,7 @@ export interface MessageEvent {
   id: string;
   message_id: string;
   event_type: string;
-  telegram_message_id: number | null;
+  provider_message_id: string | null;
   error_message: string | null;
   error_code: string | null;
   metadata: Record<string, unknown> | null;

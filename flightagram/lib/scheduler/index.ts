@@ -11,10 +11,12 @@ import { calculateNextRetryTime, shouldRetry } from './retry';
 import { dispatchMessage } from '@/lib/messages/dispatcher';
 import { registerAdapter } from '@/lib/channels/types';
 import { telegramAdapter } from '@/lib/telegram/adapter';
+import { emailAdapter } from '@/lib/email/adapter';
 import type { SchedulerTickResult, Message, Receiver, Flight, FlightSubscription } from '@/types';
 
-// Register the Telegram adapter
+// Register channel adapters
 registerAdapter(telegramAdapter);
+registerAdapter(emailAdapter);
 
 // Maximum messages to process per tick (prevent timeout)
 const MAX_MESSAGES_PER_TICK = 50;
@@ -74,6 +76,7 @@ async function fetchDueMessages(): Promise<DueMessageWithRelations[]> {
         receiver_id: m.receiver_id,
         message_type: m.message_type,
         status: m.status,
+        channel: m.channel || 'TELEGRAM',
         scheduled_for: m.scheduled_for,
         content: m.content,
         sent_at: m.sent_at,

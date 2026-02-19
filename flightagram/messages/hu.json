@@ -232,6 +232,11 @@
       "copyLink": "Link másolása",
       "copied": "Másolva!",
       "telegramLink": "Telegram feliratkozási link",
+      "emailLink": "Email megerősítés",
+      "emailConfirmationSent": "Megerősítő email elküldve",
+      "channelTelegram": "Telegram",
+      "channelEmail": "Email",
+      "emailPlaceholder": "pl. anya@example.com",
       "goToDashboard": "Irány a vezérlőpult"
     },
     "details": {
@@ -273,6 +278,16 @@
     "openTelegram": "Telegram megnyitása",
     "flightStatus": "Járat állapota",
     "lastUpdated": "Utoljára frissítve"
+  },
+  "email": {
+    "confirmed": {
+      "title": "Email megerősítve!",
+      "subtitle": "Mostantól emailben kapsz értesítéseket a járatokról."
+    },
+    "invalidLink": {
+      "title": "Érvénytelen link",
+      "subtitle": "Ez a link érvénytelen vagy lejárt."
+    }
   },
   "common": {
     "loading": "Betöltés...",

@@ -19,6 +19,8 @@ interface Flight {
 
 interface Receiver {
   display_name: string;
+  channel: "TELEGRAM" | "EMAIL";
+  email_address: string;
 }
 
 interface CreatedSubscription {
@@ -30,6 +32,7 @@ interface CreatedSubscription {
     id: string;
     display_name: string;
     opt_in_url: string;
+    channel: string;
   }>;
 }
 
@@ -37,7 +40,7 @@ export default function CreateSubscriptionPage() {
   const [flightNumber, setFlightNumber] = useState("");
   const [flightDate, setFlightDate] = useState("");
   const [travellerName, setTravellerName] = useState("");
-  const [receivers, setReceivers] = useState<Receiver[]>([{ display_name: "" }]);
+  const [receivers, setReceivers] = useState<Receiver[]>([{ display_name: "", channel: "TELEGRAM", email_address: "" }]);
   const [flight, setFlight] = useState<Flight | null>(null);
   const [searching, setSearching] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -82,7 +85,7 @@ export default function CreateSubscriptionPage() {
 
   const addReceiver = () => {
     if (receivers.length < 3) {
-      setReceivers([...receivers, { display_name: "" }]);
+      setReceivers([...receivers, { display_name: "", channel: "TELEGRAM", email_address: "" }]);
     }
   };
 
@@ -90,9 +93,9 @@ export default function CreateSubscriptionPage() {
     setReceivers(receivers.filter((_, i) => i !== index));
   };
 
-  const updateReceiver = (index: number, name: string) => {
+  const updateReceiverField = (index: number, field: keyof Receiver, value: string) => {
     const updated = [...receivers];
-    updated[index] = { display_name: name };
+    updated[index] = { ...updated[index], [field]: value };
     setReceivers(updated);
   };
 
@@ -101,7 +104,13 @@ export default function CreateSubscriptionPage() {
 
     if (!flight || !travellerName) return;
 
-    const validReceivers = receivers.filter((r) => r.display_name.trim());
+    const validReceivers = receivers
+      .filter((r) => r.display_name.trim())
+      .map((r) => ({
+        display_name: r.display_name,
+        channel: r.channel,
+        ...(r.channel === "EMAIL" && r.email_address ? { email_address: r.email_address } : {}),
+      }));
     if (validReceivers.length === 0) return;
 
     setCreating(true);

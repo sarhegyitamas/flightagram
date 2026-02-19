@@ -232,6 +232,11 @@
       "copyLink": "Copy Link",
       "copied": "Copied!",
       "telegramLink": "Telegram Opt-in Link",
+      "emailLink": "Email Confirmation",
+      "emailConfirmationSent": "Confirmation email sent",
+      "channelTelegram": "Telegram",
+      "channelEmail": "Email",
+      "emailPlaceholder": "e.g. mom@example.com",
       "goToDashboard": "Go to Dashboard"
     },
     "details": {
@@ -273,6 +278,16 @@
     "openTelegram": "Open Telegram",
     "flightStatus": "Flight Status",
     "lastUpdated": "Last updated"
+  },
+  "email": {
+    "confirmed": {
+      "title": "Email Confirmed!",
+      "subtitle": "You'll now receive flight updates via email."
+    },
+    "invalidLink": {
+      "title": "Invalid Link",
+      "subtitle": "This link is not valid or has expired."
+    }
   },
   "common": {
     "loading": "Loading...",

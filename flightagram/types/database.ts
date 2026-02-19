@@ -50,6 +50,8 @@ export type Database = {
           telegram_chat_id: number | null;
           telegram_opted_in: boolean;
           telegram_username: string | null;
+          email_address: string | null;
+          email_opted_in: boolean;
           display_name: string;
           created_at: string;
           updated_at: string;
@@ -59,6 +61,8 @@ export type Database = {
           telegram_chat_id?: number | null;
           telegram_opted_in?: boolean;
           telegram_username?: string | null;
+          email_address?: string | null;
+          email_opted_in?: boolean;
           display_name: string;
           created_at?: string;
           updated_at?: string;
@@ -68,6 +72,8 @@ export type Database = {
           telegram_chat_id?: number | null;
           telegram_opted_in?: boolean;
           telegram_username?: string | null;
+          email_address?: string | null;
+          email_opted_in?: boolean;
           display_name?: string;
           created_at?: string;
           updated_at?: string;
@@ -81,7 +87,7 @@ export type Database = {
           receiver_id: string;
           opt_in_token: string;
           opt_in_status: 'PENDING' | 'ACTIVE' | 'UNSUBSCRIBED';
-          channel: 'TELEGRAM' | 'WHATSAPP';
+          channel: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
           opted_in_at: string | null;
           created_at: string;
         };
@@ -91,7 +97,7 @@ export type Database = {
           receiver_id: string;
           opt_in_token: string;
           opt_in_status?: 'PENDING' | 'ACTIVE' | 'UNSUBSCRIBED';
-          channel?: 'TELEGRAM' | 'WHATSAPP';
+          channel?: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
           opted_in_at?: string | null;
           created_at?: string;
         };
@@ -101,7 +107,7 @@ export type Database = {
           receiver_id?: string;
           opt_in_token?: string;
           opt_in_status?: 'PENDING' | 'ACTIVE' | 'UNSUBSCRIBED';
-          channel?: 'TELEGRAM' | 'WHATSAPP';
+          channel?: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
           opted_in_at?: string | null;
           created_at?: string;
         };
@@ -288,6 +294,7 @@ export type Database = {
           receiver_id: string;
           message_type: 'DEPARTURE' | 'EN_ROUTE' | 'ARRIVAL' | 'DELAY' | 'CANCELLATION';
           status: 'PENDING' | 'SCHEDULED' | 'SENT' | 'FAILED' | 'SKIPPED';
+          channel: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
           scheduled_for: string | null;
           content: string | null;
           sent_at: string | null;
@@ -304,6 +311,7 @@ export type Database = {
           receiver_id: string;
           message_type: 'DEPARTURE' | 'EN_ROUTE' | 'ARRIVAL' | 'DELAY' | 'CANCELLATION';
           status?: 'PENDING' | 'SCHEDULED' | 'SENT' | 'FAILED' | 'SKIPPED';
+          channel?: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
           scheduled_for?: string | null;
           content?: string | null;
           sent_at?: string | null;
@@ -320,6 +328,7 @@ export type Database = {
           receiver_id?: string;
           message_type?: 'DEPARTURE' | 'EN_ROUTE' | 'ARRIVAL' | 'DELAY' | 'CANCELLATION';
           status?: 'PENDING' | 'SCHEDULED' | 'SENT' | 'FAILED' | 'SKIPPED';
+          channel?: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
           scheduled_for?: string | null;
           content?: string | null;
           sent_at?: string | null;
@@ -352,7 +361,7 @@ export type Database = {
           id: string;
           message_id: string;
           event_type: string;
-          telegram_message_id: number | null;
+          provider_message_id: string | null;
           error_message: string | null;
           error_code: string | null;
           metadata: Json | null;
@@ -362,7 +371,7 @@ export type Database = {
           id?: string;
           message_id: string;
           event_type: string;
-          telegram_message_id?: number | null;
+          provider_message_id?: string | null;
           error_message?: string | null;
           error_code?: string | null;
           metadata?: Json | null;
@@ -372,7 +381,7 @@ export type Database = {
           id?: string;
           message_id?: string;
           event_type?: string;
-          telegram_message_id?: number | null;
+          provider_message_id?: string | null;
           error_message?: string | null;
           error_code?: string | null;
           metadata?: Json | null;
@@ -460,7 +469,7 @@ export type Database = {
     Views: {};
     Functions: {};
     Enums: {
-      channel_type: 'TELEGRAM' | 'WHATSAPP';
+      channel_type: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
       flight_status: 'SCHEDULED' | 'DEPARTED' | 'EN_ROUTE' | 'ARRIVED' | 'DELAYED' | 'CANCELED';
       message_status: 'PENDING' | 'SCHEDULED' | 'SENT' | 'FAILED' | 'SKIPPED';
       message_type: 'DEPARTURE' | 'EN_ROUTE' | 'ARRIVAL' | 'DELAY' | 'CANCELLATION';

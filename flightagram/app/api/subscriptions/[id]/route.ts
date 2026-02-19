@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { cancelSubscription } from '@/lib/flights/tracker';
 import { telegramAdapter } from '@/lib/telegram/adapter';
+import { emailAdapter } from '@/lib/email/adapter';
+import type { ChannelType } from '@/types';
 import type { SubscriptionWithJoins, TravellerRef } from '@/types/subscriptions';
 
 /**
@@ -76,7 +78,7 @@ export async function GET(
     );
     const { data: links } = await supabase
       .from('traveller_receiver_links')
-      .select('receiver_id, opt_in_status, opt_in_token')
+      .select('receiver_id, opt_in_status, opt_in_token, channel')
       .eq('traveller_id', subscription.traveller_id)
       .in('receiver_id', receiverIds);
 
@@ -96,13 +98,19 @@ export async function GET(
       flight: subscription.flights,
       receivers: (subscription.subscription_receivers || []).map((sr) => {
         const link = linksByReceiverId.get(sr.receivers.id);
+        const channel = (link?.channel as ChannelType) || 'TELEGRAM';
+        let optInUrl = '';
+        if (link?.opt_in_token) {
+          optInUrl = channel === 'EMAIL'
+            ? emailAdapter.generateOptInLink(link.opt_in_token)
+            : telegramAdapter.generateOptInLink(link.opt_in_token);
+        }
         return {
           id: sr.receivers.id,
           display_name: sr.receivers.display_name,
+          channel,
           opt_in_status: link?.opt_in_status || 'PENDING',
-          opt_in_url: link?.opt_in_token
-            ? telegramAdapter.generateOptInLink(link.opt_in_token)
-            : '',
+          opt_in_url: optInUrl,
         };
       }),
       messages: messages || [],

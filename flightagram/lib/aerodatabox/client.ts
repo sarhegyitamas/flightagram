@@ -15,7 +15,7 @@ import type {
 
 // Configuration
 const DEFAULT_BASE_URL = 'https://prod.api.market/api/v1/aedbx/aerodatabox';
-const MOCK_MODE = !process.env.AERODATABOX_API_KEY;
+const MOCK_MODE = process.env.AERODATABOX_MOCK === 'true' || !process.env.AERODATABOX_API_KEY;
 
 interface ADBClientConfig {
   baseUrl?: string;
@@ -164,33 +164,42 @@ class AeroDataBoxClient {
 
     // Mock flight search
     if (endpoint.includes('/flights/number/')) {
+      // Extract flight number and date from endpoint: /flights/number/{flightNumber}/{date}
+      const parts = endpoint.split('/');
+      const flightNumber = decodeURIComponent(parts[parts.indexOf('number') + 1] || 'UA123');
+      const date = parts[parts.indexOf('number') + 2] || new Date().toISOString().slice(0, 10);
+      const airlineIata = flightNumber.replace(/[0-9]/g, '').toUpperCase();
+
+      const departureTime = new Date(`${date}T10:00:00Z`);
+      const arrivalTime = new Date(`${date}T15:00:00Z`);
+
       const mockFlight: ADBFlight = {
-        number: 'UA123',
+        number: flightNumber,
         status: 'Scheduled',
         airline: {
-          iata: 'UA',
-          name: 'United Airlines',
+          iata: airlineIata,
+          name: `${airlineIata} Airlines (Mock)`,
         },
         departure: {
           airport: {
-            iata: 'SFO',
-            name: 'San Francisco International',
-            timeZone: 'America/Los_Angeles',
+            iata: 'BUD',
+            name: 'Budapest Ferenc Liszt International',
+            timeZone: 'Europe/Budapest',
           },
           scheduledTime: {
-            utc: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-            local: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+            utc: departureTime.toISOString(),
+            local: departureTime.toISOString(),
           },
         },
         arrival: {
           airport: {
-            iata: 'JFK',
-            name: 'John F. Kennedy International',
-            timeZone: 'America/New_York',
+            iata: 'LHR',
+            name: 'London Heathrow',
+            timeZone: 'Europe/London',
           },
           scheduledTime: {
-            utc: new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString(),
-            local: new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString(),
+            utc: arrivalTime.toISOString(),
+            local: arrivalTime.toISOString(),
           },
         },
       };

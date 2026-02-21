@@ -124,7 +124,8 @@ export async function createSubscription(
   travellerId: string,
   flightId: string,
   travellerName: string,
-  receiverIds: string[]
+  receiverIds: string[],
+  customMessages?: { tone: string; messages: Record<string, string> }
 ): Promise<FlightSubscription | null> {
   const supabase = createAdminClient();
 
@@ -137,6 +138,7 @@ export async function createSubscription(
       traveller_name: travellerName,
       is_active: true,
       polling_enabled: true, // Enable polling fallback by default
+      ...(customMessages ? { custom_messages: customMessages } : {}),
     })
     .select()
     .single();

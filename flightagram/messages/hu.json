@@ -237,7 +237,20 @@
       "channelTelegram": "Telegram",
       "channelEmail": "Email",
       "emailPlaceholder": "pl. anya@example.com",
-      "goToDashboard": "Irány a vezérlőpult"
+      "goToDashboard": "Irány a vezérlőpult",
+      "messagesTitle": "Üzenetek",
+      "messagesDesc": "Válassz hangnemet és nézd meg az üzeneteket, amelyeket a szeretteid kapnak.",
+      "toneLabel": "Hangnem",
+      "toneLoving": "Szeretetteljes",
+      "toneCaring": "Gondoskodó",
+      "toneSimple": "Egyszerű",
+      "toneFunny": "Vicces",
+      "messagePreviewDeparture": "Indulás",
+      "messagePreviewEnRoute": "Repülés közben",
+      "messagePreviewArrival": "Érkezés",
+      "messagePreviewPlaceholderNote": "Az előnézet {firstReceiver} szemszögéből mutatja az üzenetet. Minden címzett a saját nevét fogja látni az üzenetben.",
+      "messagePreviewEditHint": "Az alábbi üzeneteket tetszés szerint szerkesztheted.",
+      "regenerateMessages": "Üzenetek újragenerálása"
     },
     "details": {
       "title": "Járat részletei",

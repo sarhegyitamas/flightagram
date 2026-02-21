@@ -101,6 +101,7 @@ export interface FlightSubscription {
   is_active: boolean;
   adb_webhook_id: string | null;
   polling_enabled: boolean;
+  custom_messages: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }

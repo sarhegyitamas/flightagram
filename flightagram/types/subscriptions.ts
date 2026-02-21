@@ -15,6 +15,7 @@ export interface SubscriptionWithJoins {
   is_active: boolean;
   adb_webhook_id: string | null;
   polling_enabled: boolean;
+  custom_messages: unknown | null;
   created_at: string;
   updated_at: string;
   flights: FlightRow;

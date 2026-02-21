@@ -8,6 +8,8 @@ import { messageLogger as logger } from '@/lib/logging';
 import { getAdapter } from '@/lib/channels/types';
 import { generateMessageContent } from './templates';
 import { buildFlightEmailHTML } from '@/lib/email/templates';
+import { interpolateCustomMessage } from './presets';
+import type { CustomizableMessageType } from './presets';
 import type { MessageContext } from './types';
 import type { Message, Receiver, Flight, FlightSubscription, ChannelType, MessageType } from '@/types';
 
@@ -111,8 +113,43 @@ export async function dispatchMessage(
   const context = buildMessageContext(subscription, flight);
   let content: string;
 
+  // Check for custom messages (only for DEPARTURE, EN_ROUTE, ARRIVAL)
+  const customizableTypes: CustomizableMessageType[] = ['DEPARTURE', 'EN_ROUTE', 'ARRIVAL'];
+  const customMessages = subscription.custom_messages as { tone: string; messages: Record<string, string> } | null;
+  const hasCustomMessage = customMessages?.messages?.[message.message_type] &&
+    customizableTypes.includes(message.message_type as CustomizableMessageType);
+
   try {
-    if (channel === 'EMAIL') {
+    if (hasCustomMessage) {
+      const template = customMessages!.messages[message.message_type];
+      const originName = context.origin.name || context.origin.code;
+      const destName = context.destination.name || context.destination.code;
+      const formatTime = (date: Date | undefined, tz?: string) => {
+        if (!date) return 'TBD';
+        try {
+          return date.toLocaleTimeString('en-US', {
+            hour: 'numeric', minute: '2-digit', hour12: true,
+            timeZone: tz || 'UTC',
+          });
+        } catch { return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }); }
+      };
+      const interpolated = interpolateCustomMessage(template, {
+        name: context.traveller_name,
+        flight: context.flight_number,
+        origin: originName,
+        destination: destName,
+        departure_time: formatTime(context.times.actual_departure || context.times.scheduled_departure, context.origin.timezone),
+        arrival_time: formatTime(context.times.estimated_arrival || context.times.scheduled_arrival, context.destination.timezone),
+        receiver: receiver.display_name,
+      });
+
+      if (channel === 'EMAIL') {
+        const emailContent = buildFlightEmailHTMLFromCustom(interpolated, message.message_type, context);
+        content = JSON.stringify(emailContent);
+      } else {
+        content = interpolated;
+      }
+    } else if (channel === 'EMAIL') {
       const emailContent = buildFlightEmailHTML(message.message_type, context);
       content = JSON.stringify(emailContent);
     } else {
@@ -291,78 +328,26 @@ export async function rescheduleMessages(
       .in('status', ['PENDING', 'SCHEDULED'])
       .in('message_type', ['DEPARTURE', 'EN_ROUTE', 'ARRIVAL']);
 
-    // Create cancellation messages for all receivers
-    const { data: subscriptionReceivers } = await supabase
-      .from('subscription_receivers')
-      .select('receiver_id')
-      .eq('subscription_id', subscriptionId);
-
-    if (subscriptionReceivers) {
-      for (const sr of subscriptionReceivers) {
-        const idempotencyKey = `${subscriptionId}:${sr.receiver_id}:CANCELLATION:${flight.status_version}`;
-
-        await supabase.from('messages').upsert(
-          {
-            subscription_id: subscriptionId,
-            receiver_id: sr.receiver_id,
-            message_type: 'CANCELLATION',
-            status: 'PENDING',
-            scheduled_for: new Date().toISOString(),
-            idempotency_key: idempotencyKey,
-          },
-          {
-            onConflict: 'idempotency_key',
-            ignoreDuplicates: true,
-          }
-        );
-      }
-    }
-
+    await createMessagesForReceivers(subscriptionId, 'CANCELLATION' as MessageType, flight);
     return;
   }
 
-  // If delayed, create delay messages
-  if (newStatus === 'DELAYED') {
-    const { data: subscriptionReceivers } = await supabase
-      .from('subscription_receivers')
-      .select('receiver_id')
-      .eq('subscription_id', subscriptionId);
+  // Map status to message type
+  const statusToMessageType: Record<string, MessageType> = {
+    DEPARTED: 'DEPARTURE',
+    EN_ROUTE: 'EN_ROUTE',
+    ARRIVED: 'ARRIVAL',
+    DELAYED: 'DELAY',
+  };
 
-    if (subscriptionReceivers) {
-      for (const sr of subscriptionReceivers) {
-        const idempotencyKey = `${subscriptionId}:${sr.receiver_id}:DELAY:${flight.status_version}`;
-
-        await supabase.from('messages').upsert(
-          {
-            subscription_id: subscriptionId,
-            receiver_id: sr.receiver_id,
-            message_type: 'DELAY',
-            status: 'PENDING',
-            scheduled_for: new Date().toISOString(),
-            idempotency_key: idempotencyKey,
-          },
-          {
-            onConflict: 'idempotency_key',
-            ignoreDuplicates: true,
-          }
-        );
-      }
-    }
+  const messageType = statusToMessageType[newStatus];
+  if (!messageType) {
+    logger.debug('No message type for status', { newStatus });
+    return;
   }
 
-  // Update scheduled times for pending messages based on new flight times
-  if (flight.actual_departure || flight.estimated_arrival) {
-    // EN_ROUTE messages should be 30 min after actual departure
-    if (flight.actual_departure) {
-      const enRouteTime = new Date(flight.actual_departure);
-      enRouteTime.setMinutes(enRouteTime.getMinutes() + 30);
-
-      await supabase
-        .from('messages')
-        .update({ scheduled_for: enRouteTime.toISOString() })
-        .eq('subscription_id', subscriptionId)
-        .eq('message_type', 'EN_ROUTE')
-        .in('status', ['PENDING', 'SCHEDULED']);
-    }
-  }
+  await createMessagesForReceivers(subscriptionId, messageType, flight);
 }
+
+// Backward-compatible alias
+export const rescheduleMessages = handleFlightStatusChange;

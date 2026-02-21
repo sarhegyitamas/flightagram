@@ -237,7 +237,20 @@
       "channelTelegram": "Telegram",
       "channelEmail": "Email",
       "emailPlaceholder": "e.g. mom@example.com",
-      "goToDashboard": "Go to Dashboard"
+      "goToDashboard": "Go to Dashboard",
+      "messagesTitle": "Messages",
+      "messagesDesc": "Choose a tone and preview the messages your loved ones will receive.",
+      "toneLabel": "Tone",
+      "toneLoving": "Loving",
+      "toneCaring": "Caring",
+      "toneSimple": "Simple",
+      "toneFunny": "Funny",
+      "messagePreviewDeparture": "Departure",
+      "messagePreviewEnRoute": "In Flight",
+      "messagePreviewArrival": "Arrival",
+      "messagePreviewPlaceholderNote": "You are previewing the message for {firstReceiver}. Each receiver will see their own name in the message.",
+      "messagePreviewEditHint": "You can edit the messages below to make them your own.",
+      "regenerateMessages": "Regenerate messages"
     },
     "details": {
       "title": "Flight Details",

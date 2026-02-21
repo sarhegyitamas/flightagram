@@ -30,6 +30,14 @@ const createSubscriptionSchema = z.object({
     channel: z.enum(['TELEGRAM', 'EMAIL']).default('TELEGRAM'),
     email_address: z.string().email().optional(),
   })).min(1).max(3),
+  custom_messages: z.object({
+    tone: z.enum(['loving', 'caring', 'simple', 'funny']),
+    messages: z.object({
+      DEPARTURE: z.string().max(1000),
+      EN_ROUTE: z.string().max(1000),
+      ARRIVAL: z.string().max(1000),
+    }),
+  }).optional(),
 });
 
 /**
@@ -127,7 +135,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { flight_number, flight_date, traveller_name, receivers } = result.data;
+    const { flight_number, flight_date, traveller_name, receivers, custom_messages } = result.data;
     const adminClient = createAdminClient();
 
     // Get or create traveller record
@@ -245,7 +253,8 @@ export async function POST(request: NextRequest) {
       traveller.id,
       flight.id,
       traveller_name,
-      receiverIds
+      receiverIds,
+      custom_messages
     );
 
     if (!subscription) {

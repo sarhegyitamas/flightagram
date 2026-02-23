@@ -117,29 +117,14 @@ export default function CreateSubscriptionPage() {
     }
   }, [flight, travellerName, hasValidReceiver, messagesInitialized]);
 
-  // When names change, swap old → new in existing message text (preserves user edits)
+  // When names change, regenerate messages from presets with current names
   useEffect(() => {
     if (!messagesInitialized) return;
     const oldTraveller = prevTravellerName.current;
     const oldReceiver = prevReceiverName.current;
-    const nameChanged = oldTraveller !== travellerName;
-    const receiverChanged = oldReceiver !== firstReceiverName;
 
-    if (nameChanged || receiverChanged) {
-      setCustomMessages((prev) => {
-        const result = {} as Record<CustomizableMessageType, string>;
-        for (const type of ["DEPARTURE", "EN_ROUTE", "ARRIVAL"] as CustomizableMessageType[]) {
-          let msg = prev[type];
-          if (nameChanged && oldTraveller) {
-            msg = msg.replaceAll(oldTraveller, travellerName);
-          }
-          if (receiverChanged && oldReceiver) {
-            msg = msg.replaceAll(oldReceiver, firstReceiverName);
-          }
-          result[type] = msg;
-        }
-        return result;
-      });
+    if (oldTraveller !== travellerName || oldReceiver !== firstReceiverName) {
+      setCustomMessages(generatePreviewMessages(selectedTone));
     }
 
     prevTravellerName.current = travellerName;

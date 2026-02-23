@@ -47,6 +47,23 @@ If you already have a link, click it to start receiving updates!`;
   }
 
   if (link.opt_in_status === 'ACTIVE') {
+    // Still update receiver's Telegram info in case it was missed on first opt-in
+    logger.info('Already active, updating receiver Telegram info', { receiverId: link.receiver_id, chatId });
+    const { error: activeUpdateError, count } = await supabase
+      .from('receivers')
+      .update({
+        telegram_chat_id: chatId,
+        telegram_opted_in: true,
+        telegram_username: username || null,
+      })
+      .eq('id', link.receiver_id);
+
+    if (activeUpdateError) {
+      logger.error('Failed to update receiver (already active)', { receiverId: link.receiver_id, errorMessage: activeUpdateError.message, errorDetails: activeUpdateError.details, errorCode: activeUpdateError.code, errorHint: activeUpdateError.hint });
+    } else {
+      logger.info('Receiver updated (already active)', { receiverId: link.receiver_id, count });
+    }
+
     return `You're already set up to receive flight updates! No further action needed.`;
   }
 

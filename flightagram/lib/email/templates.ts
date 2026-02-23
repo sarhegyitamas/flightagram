@@ -243,6 +243,38 @@ export function buildFlightEmailHTML(
   return template(context);
 }
 
+/**
+ * Build email HTML from a custom message template (user-authored text).
+ * Wraps the interpolated text in the standard email layout.
+ */
+export function buildFlightEmailHTMLFromCustom(
+  customText: string,
+  messageType: MessageType,
+  context: MessageContext
+): EmailContent {
+  const subjectMap: Record<string, string> = {
+    DEPARTURE: `${context.traveller_name}'s flight ${context.flight_number} has departed`,
+    EN_ROUTE: `${context.traveller_name} is in the air — Flight ${context.flight_number}`,
+    ARRIVAL: `${context.traveller_name} has landed — Flight ${context.flight_number}`,
+  };
+  const subject = subjectMap[messageType] || `Flight update for ${context.traveller_name}`;
+
+  // Escape HTML in user text and convert newlines to <br>
+  const escapedText = customText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>');
+
+  const html = wrapInLayout(`
+    <p style="color:#ffffff;font-size:16px;line-height:1.6;margin:0;">
+      ${escapedText}
+    </p>
+  `);
+
+  return { subject, html, text: customText };
+}
+
 export function buildConfirmationEmailHTML(
   receiverName: string,
   travellerName: string,

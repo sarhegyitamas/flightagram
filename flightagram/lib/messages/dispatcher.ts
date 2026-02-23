@@ -7,7 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { messageLogger as logger } from '@/lib/logging';
 import { getAdapter } from '@/lib/channels/types';
 import { generateMessageContent } from './templates';
-import { buildFlightEmailHTML } from '@/lib/email/templates';
+import { buildFlightEmailHTML, buildFlightEmailHTMLFromCustom } from '@/lib/email/templates';
 import { interpolateCustomMessage } from './presets';
 import type { CustomizableMessageType } from './presets';
 import type { MessageContext } from './types';

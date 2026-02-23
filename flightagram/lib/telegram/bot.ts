@@ -48,8 +48,7 @@ If you already have a link, click it to start receiving updates!`;
 
   if (link.opt_in_status === 'ACTIVE') {
     // Still update receiver's Telegram info in case it was missed on first opt-in
-    logger.info('Already active, updating receiver Telegram info', { receiverId: link.receiver_id, chatId });
-    const { error: activeUpdateError, count } = await supabase
+    const { error: activeUpdateError } = await supabase
       .from('receivers')
       .update({
         telegram_chat_id: chatId,
@@ -59,9 +58,7 @@ If you already have a link, click it to start receiving updates!`;
       .eq('id', link.receiver_id);
 
     if (activeUpdateError) {
-      logger.error('Failed to update receiver (already active)', { receiverId: link.receiver_id, errorMessage: activeUpdateError.message, errorDetails: activeUpdateError.details, errorCode: activeUpdateError.code, errorHint: activeUpdateError.hint });
-    } else {
-      logger.info('Receiver updated (already active)', { receiverId: link.receiver_id, count });
+      logger.error('Failed to update receiver (already active)', { receiverId: link.receiver_id }, activeUpdateError);
     }
 
     return `You're already set up to receive flight updates! No further action needed.`;
@@ -148,35 +145,36 @@ async function handleStopCommand(command: ParsedWebhookCommand): Promise<string>
 
   const supabase = createAdminClient();
 
-  // Find all active links for this chat
-  const { data: receiver } = await supabase
+  // Find all receiver rows for this chat (one per subscription)
+  const { data: receivers } = await supabase
     .from('receivers')
     .select('id')
-    .eq('telegram_chat_id', chatId)
-    .single();
+    .eq('telegram_chat_id', chatId);
 
-  if (!receiver) {
+  if (!receivers || receivers.length === 0) {
     return `You don't appear to have any active subscriptions.`;
   }
 
-  // Unsubscribe from all travellers
+  const receiverIds = receivers.map((r) => r.id);
+
+  // Unsubscribe from all travellers across all receiver rows
   const { data: links, error } = await supabase
     .from('traveller_receiver_links')
     .update({ opt_in_status: 'UNSUBSCRIBED' })
-    .eq('receiver_id', receiver.id)
+    .in('receiver_id', receiverIds)
     .eq('opt_in_status', 'ACTIVE')
     .select();
 
   if (error) {
-    logger.error('Failed to unsubscribe', { receiverId: receiver.id }, error);
+    logger.error('Failed to unsubscribe', { receiverIds }, error);
     return `Sorry, something went wrong. Please try again later.`;
   }
 
-  // Mark receiver as no longer opted in
+  // Mark all receiver rows as no longer opted in
   await supabase
     .from('receivers')
     .update({ telegram_opted_in: false })
-    .eq('id', receiver.id);
+    .in('id', receiverIds);
 
   const count = links?.length || 0;
 
@@ -184,7 +182,7 @@ async function handleStopCommand(command: ParsedWebhookCommand): Promise<string>
     return `You don't have any active subscriptions to unsubscribe from.`;
   }
 
-  logger.info('Receiver unsubscribed', { receiverId: receiver.id, count });
+  logger.info('Receiver unsubscribed', { receiverIds, count });
 
   return `You've been unsubscribed from ${count} traveller${count > 1 ? 's' : ''}. You won't receive any more flight updates.
 
@@ -199,18 +197,19 @@ async function handleStatusCommand(command: ParsedWebhookCommand): Promise<strin
 
   const supabase = createAdminClient();
 
-  // Find receiver by chat ID
-  const { data: receiver } = await supabase
+  // Find all receiver rows for this chat (one per subscription)
+  const { data: receivers } = await supabase
     .from('receivers')
-    .select('id, display_name')
-    .eq('telegram_chat_id', chatId)
-    .single();
+    .select('id')
+    .eq('telegram_chat_id', chatId);
 
-  if (!receiver) {
+  if (!receivers || receivers.length === 0) {
     return `You haven't connected to Flightagram yet. Use an invitation link from a traveller to get started.`;
   }
 
-  // Get active subscriptions
+  const receiverIds = receivers.map((r) => r.id);
+
+  // Get active subscriptions across all receiver rows
   const { data: links } = await supabase
     .from('traveller_receiver_links')
     .select(`
@@ -218,7 +217,7 @@ async function handleStatusCommand(command: ParsedWebhookCommand): Promise<strin
       opt_in_status,
       travellers!inner(display_name)
     `)
-    .eq('receiver_id', receiver.id);
+    .in('receiver_id', receiverIds);
 
   if (!links || links.length === 0) {
     return `You're registered but not subscribed to any travellers yet.`;
@@ -230,12 +229,15 @@ async function handleStatusCommand(command: ParsedWebhookCommand): Promise<strin
     return `You're registered but have unsubscribed from all travellers. Use a new invitation link to re-subscribe.`;
   }
 
-  const travellerNames = activeLinks
-    .map((l) => {
+  // Deduplicate traveller names (same traveller may appear via different receiver rows)
+  const uniqueNames = new Set(
+    activeLinks.map((l) => {
       const traveller = l.travellers as unknown as { display_name: string };
-      return `• ${traveller.display_name}`;
+      return traveller.display_name;
     })
-    .join('\n');
+  );
+
+  const travellerNames = Array.from(uniqueNames).map((name) => `• ${name}`).join('\n');
 
   return `You're receiving flight updates for:
 ${travellerNames}

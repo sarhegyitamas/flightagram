@@ -18,9 +18,9 @@ async function handleStartCommand(command: ParsedWebhookCommand): Promise<string
     // No token = user clicked on bot directly without deep link
     return `Welcome to Flightagram!
 
-I send flight status updates to keep your loved ones informed about your travels.
+I send flight status updates to keep you informed about the travels of your loved ones.
 
-To get started, a traveller needs to add you as a contact. Once they do, you'll receive a special link to activate updates.
+To get started, a traveller needs to add you as a contact on flightagram.com. Once they do, you'll receive a special link to activate updates.
 
 If you already have a link, click it to start receiving updates!`;
   }
@@ -233,10 +233,28 @@ async function handleUnknownCommand(command: ParsedWebhookCommand): Promise<stri
   return `I didn't understand that command.
 
 Available commands:
+/help - Show this help message
+/start - Start receiving flight updates (requires invitation link)
 /status - Check your subscription status
 /stop - Unsubscribe from all flight updates
 
 To subscribe, you need an invitation link from a traveller.`;
+}
+
+/**
+ * 
+ * Handle help command
+ */
+
+async function handleHelpCommand(command: ParsedWebhookCommand): Promise<string> {
+  return `Here are the commands you can use:
+
+/help - Show this help message
+/start - Start receiving flight updates (requires invitation link)
+/status - Check your subscription status
+/stop - Unsubscribe from all flight updates
+
+To subscribe, you need an invitation link from a traveller. If you have any questions or need assistance, feel free to reach out to our support team!`;
 }
 
 /**
@@ -259,6 +277,9 @@ export async function handleTelegramCommand(
       break;
     case 'STOP':
       response = await handleStopCommand(command);
+      break;
+    case 'HELP':
+      response = await handleHelpCommand(command);
       break;
     case 'STATUS':
       response = await handleStatusCommand(command);

@@ -166,6 +166,15 @@ class TelegramAdapter implements ChannelAdapter {
       };
     }
 
+    if (text.startsWith('/help')) {
+      return {
+        type: 'HELP',
+        chatId,
+        userId,
+        username,
+      };
+    }
+
     // Unknown command or regular message
     return {
       type: 'UNKNOWN',
@@ -219,6 +228,16 @@ class TelegramAdapter implements ChannelAdapter {
    */
   async getWebhookInfo(): Promise<TelegramApiResponse<unknown>> {
     return this.apiRequest('getWebhookInfo');
+  }
+
+  /**
+   * Register bot commands for the Telegram command menu
+   */
+  async setMyCommands(
+    commands: { command: string; description: string }[]
+  ): Promise<boolean> {
+    const response = await this.apiRequest<boolean>('setMyCommands', { commands });
+    return response.ok;
   }
 
   /**

@@ -310,7 +310,7 @@ export interface SendResult {
 }
 
 export interface ParsedWebhookCommand {
-  type: 'START' | 'STOP' | 'STATUS' | 'UNKNOWN';
+  type: 'START' | 'STOP' | 'STATUS' | 'HELP' | 'UNKNOWN';
   chatId: number;
   userId: number;
   username?: string;

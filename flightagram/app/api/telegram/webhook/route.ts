@@ -46,6 +46,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Register bot commands for the Telegram command menu
+  const commandsOk = await telegramAdapter.setMyCommands([
+    { command: 'start', description: 'Subscribe to flight updates' },
+    { command: 'status', description: 'Check your subscriptions' },
+    { command: 'stop', description: 'Unsubscribe from all updates' },
+    { command: 'help', description: 'Show available commands' },
+  ]);
+
+  if (!commandsOk) {
+    logger.warn('Failed to register bot commands');
+  }
+
   logger.info('Telegram webhook registered successfully');
   return NextResponse.json({ success: true, webhookUrl });
 }

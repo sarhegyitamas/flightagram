@@ -24,7 +24,6 @@ type ReceiverRow = Database['public']['Tables']['receivers']['Row'];
 const createSubscriptionSchema = z.object({
   flight_number: z.string().min(2).max(10),
   flight_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  traveller_name: z.string().min(1).max(100),
   receivers: z.array(z.object({
     display_name: z.string().min(1).max(100),
     channel: z.enum(['TELEGRAM', 'EMAIL']).default('TELEGRAM'),
@@ -135,7 +134,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { flight_number, flight_date, traveller_name, receivers, custom_messages } = result.data;
+    const { flight_number, flight_date, receivers, custom_messages } = result.data;
+    const traveller_name = (user.user_metadata?.display_name as string) || user.email || 'Traveller';
     const adminClient = createAdminClient();
 
     // Get or create traveller record

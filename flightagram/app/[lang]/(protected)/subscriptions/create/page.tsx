@@ -5,6 +5,7 @@ import { Link, useRouter } from "@/src/i18n/navigation";
 import { useTranslations } from "next-intl";
 import PageHeader from "@/components/PageHeader";
 import { type ToneType, type CustomizableMessageType, getPresetMessages, interpolateCustomMessage, tonePresets } from "@/lib/messages/presets";
+import { createClient } from "@/lib/supabase/client";
 
 interface Flight {
   id?: string;
@@ -72,6 +73,18 @@ export default function CreateSubscriptionPage() {
   const t = useTranslations("subscription.create");
   const tc = useTranslations("common");
   const router = useRouter();
+
+  // Fetch the logged-in user's display name on mount
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.user_metadata?.display_name) {
+        setTravellerName(user.user_metadata.display_name as string);
+      }
+    };
+    fetchUserName();
+  }, []);
 
   // Initialize messages section when receivers are filled in
   const hasValidReceiver = receivers.some((r) => r.display_name.trim());
@@ -209,7 +222,7 @@ export default function CreateSubscriptionPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!flight || !travellerName) return;
+    if (!flight) return;
 
     const validReceivers = receivers
       .filter((r) => r.display_name.trim())
@@ -232,7 +245,6 @@ export default function CreateSubscriptionPage() {
         body: JSON.stringify({
           flight_number: flightNumber,
           flight_date: flightDate,
-          traveller_name: travellerName,
           receivers: validReceivers,
           custom_messages: {
             tone: selectedTone,
@@ -440,21 +452,6 @@ export default function CreateSubscriptionPage() {
               )}
             </div>
 
-            {/* Traveller Name Section */}
-            {flight && (
-              <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10">
-                <h2 className="text-lg font-semibold text-white mb-4">{t("yourName")}</h2>
-                <input
-                  type="text"
-                  value={travellerName}
-                  onChange={(e) => setTravellerName(e.target.value)}
-                  placeholder={t("yourNamePlaceholder")}
-                  required
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition-all"
-                />
-              </div>
-            )}
-
             {/* Receivers Section */}
             {flight && travellerName && (
               <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10">
@@ -604,7 +601,7 @@ export default function CreateSubscriptionPage() {
             )}
 
             {/* Submit Button */}
-            {flight && travellerName && receivers.some((r) => r.display_name.trim()) && (
+            {flight && travellerName && receivers.some((r) => r.display_name.trim()) && messagesInitialized && (
               <button
                 type="submit"
                 disabled={creating}

@@ -169,7 +169,6 @@ export interface SchedulerLock {
 export interface CreateSubscriptionRequest {
   flight_number: string;
   flight_date: string; // ISO date string
-  traveller_name: string;
   receivers: Array<{
     display_name: string;
   }>;

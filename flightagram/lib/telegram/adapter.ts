@@ -128,7 +128,7 @@ class TelegramAdapter implements ChannelAdapter {
     }
 
     const message = update.message;
-    const text = message.text.trim();
+    const text = message.text?.trim() || '';
     const chatId = message.chat.id;
     const userId = message.from?.id || 0;
     const username = message.from?.username;

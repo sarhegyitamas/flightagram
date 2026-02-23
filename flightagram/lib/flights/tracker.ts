@@ -7,7 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { logger } from '@/lib/logging';
 import { adbClient } from '@/lib/aerodatabox/client';
 import { parseADBFlight } from '@/lib/aerodatabox/mapper';
-import { scheduleMessagesForSubscription } from '@/lib/messages/dispatcher';
+import { handleFlightStatusChange } from '@/lib/messages/dispatcher';
 import type { Flight, FlightSubscription } from '@/types';
 import type { Database } from '@/types/database';
 
@@ -15,6 +15,7 @@ type FlightInsert = Database['public']['Tables']['flights']['Insert'];
 type FlightUpdate = Database['public']['Tables']['flights']['Update'];
 
 const flightLogger = logger;
+const MOCK_FLIGHTS = process.env.MOCK_FLIGHTS === 'true';
 
 /**
  * Create or update a flight record from AeroDataBox data
@@ -24,6 +25,38 @@ export async function upsertFlight(
   date: string
 ): Promise<Flight | null> {
   const supabase = createAdminClient();
+
+  if (MOCK_FLIGHTS) {
+    flightLogger.info('Using mock flight data', { flightNumber, date });
+    const airlineIata = flightNumber.replace(/[0-9]/g, '').toUpperCase();
+    const mockInsert: FlightInsert = {
+      flight_number: flightNumber,
+      departure_airport: 'BUD',
+      arrival_airport: 'LHR',
+      airline_iata: airlineIata,
+      airline_name: `${airlineIata} Airlines (Mock)`,
+      departure_airport_name: 'Budapest Ferenc Liszt International',
+      departure_airport_tz: 'Europe/Budapest',
+      arrival_airport_name: 'London Heathrow',
+      arrival_airport_tz: 'Europe/London',
+      scheduled_departure: `${date}T10:00:00Z`,
+      scheduled_arrival: `${date}T15:00:00Z`,
+      status: 'SCHEDULED',
+    };
+
+    const { data: mockFlight, error } = await supabase
+      .from('flights')
+      .insert(mockInsert)
+      .select()
+      .single();
+
+    if (error) {
+      flightLogger.error('Failed to insert mock flight', { flightNumber }, error);
+      return null;
+    }
+
+    return mockFlight as Flight;
+  }
 
   // Fetch flight data from AeroDataBox
   const adbFlight = await adbClient.getFlightStatus(flightNumber, date);
@@ -188,12 +221,13 @@ export async function createSubscription(
     .eq('id', flightId)
     .single();
 
-  if (flight) {
-    // Schedule messages for all receivers
-    await scheduleMessagesForSubscription(
+  if (flight && flight.status !== 'SCHEDULED') {
+    // Flight is already past SCHEDULED (e.g., already DEPARTED) -
+    // immediately create the appropriate status message
+    await handleFlightStatusChange(
       subscription.id,
-      receiverIds,
-      flight as Flight
+      flight as Flight,
+      flight.status
     );
   }
 

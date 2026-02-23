@@ -229,95 +229,114 @@ export async function dispatchMessage(
 }
 
 /**
- * Schedule messages for a subscription
+ * Schedule messages for a subscription (no-op in event-driven model)
+ * Kept for backward compatibility - the poller handles message creation
+ * when actual flight status changes are detected.
  */
 export async function scheduleMessagesForSubscription(
   subscriptionId: string,
   receiverIds: string[],
   flight: Flight
 ): Promise<void> {
-  const supabase = createAdminClient();
-
-  // Determine which messages to schedule based on flight status
-  const messagesToCreate: Array<{
-    subscription_id: string;
-    receiver_id: string;
-    message_type: string;
-    status: string;
-    scheduled_for: string | null;
-    idempotency_key: string;
-  }> = [];
-
-  for (const receiverId of receiverIds) {
-    // Always schedule lifecycle messages
-    const types = ['DEPARTURE', 'EN_ROUTE', 'ARRIVAL'] as const;
-
-    for (const type of types) {
-      const idempotencyKey = `${subscriptionId}:${receiverId}:${type}:${flight.status_version}`;
-
-      let scheduledFor: string | null = null;
-
-      // Set scheduled time based on message type
-      if (type === 'DEPARTURE' && flight.scheduled_departure) {
-        // Send when departed (triggered by webhook/poll)
-        scheduledFor = flight.scheduled_departure;
-      } else if (type === 'EN_ROUTE' && flight.scheduled_departure) {
-        // Send 30 minutes after scheduled departure
-        const departTime = new Date(flight.scheduled_departure);
-        departTime.setMinutes(departTime.getMinutes() + 30);
-        scheduledFor = departTime.toISOString();
-      } else if (type === 'ARRIVAL' && flight.scheduled_arrival) {
-        // Send when arrived (triggered by webhook/poll)
-        scheduledFor = flight.scheduled_arrival;
-      }
-
-      messagesToCreate.push({
-        subscription_id: subscriptionId,
-        receiver_id: receiverId,
-        message_type: type,
-        status: 'SCHEDULED',
-        scheduled_for: scheduledFor,
-        idempotency_key: idempotencyKey,
-      });
-    }
-  }
-
-  // Insert messages (upsert to handle idempotency)
-  for (const msg of messagesToCreate) {
-    await supabase
-      .from('messages')
-      .upsert(msg, {
-        onConflict: 'idempotency_key',
-        ignoreDuplicates: true,
-      });
-  }
-
-  logger.info('Scheduled messages for subscription', {
+  logger.info('Subscription created, poller will handle message creation', {
     subscriptionId,
     receiverCount: receiverIds.length,
-    messageCount: messagesToCreate.length,
+    flightStatus: flight.status,
   });
 }
 
 /**
- * Reschedule messages when flight status changes
+ * Create a message for each receiver of a subscription.
+ * Uses idempotency_key to prevent duplicates.
  */
-export async function rescheduleMessages(
+async function createMessagesForReceivers(
+  subscriptionId: string,
+  messageType: MessageType,
+  flight: Flight
+): Promise<void> {
+  const supabase = createAdminClient();
+
+  // Get subscription to find the traveller_id
+  const { data: subscription } = await supabase
+    .from('flight_subscriptions')
+    .select('traveller_id')
+    .eq('id', subscriptionId)
+    .single();
+
+  if (!subscription) {
+    logger.warn('Subscription not found', { subscriptionId });
+    return;
+  }
+
+  const { data: subscriptionReceivers } = await supabase
+    .from('subscription_receivers')
+    .select('receiver_id')
+    .eq('subscription_id', subscriptionId);
+
+  if (!subscriptionReceivers || subscriptionReceivers.length === 0) {
+    logger.warn('No receivers found for subscription', { subscriptionId });
+    return;
+  }
+
+  // Look up channel for each receiver from traveller_receiver_links
+  const receiverIds = subscriptionReceivers.map((sr) => sr.receiver_id);
+  const { data: links } = await supabase
+    .from('traveller_receiver_links')
+    .select('receiver_id, channel')
+    .eq('traveller_id', subscription.traveller_id)
+    .in('receiver_id', receiverIds);
+
+  const channelByReceiver = new Map(
+    (links || []).map((link) => [link.receiver_id, link.channel as ChannelType])
+  );
+
+  for (const sr of subscriptionReceivers) {
+    const channel = channelByReceiver.get(sr.receiver_id) || 'TELEGRAM';
+    const idempotencyKey = `${subscriptionId}:${sr.receiver_id}:${messageType}:${flight.status_version}`;
+
+    await supabase.from('messages').upsert(
+      {
+        subscription_id: subscriptionId,
+        receiver_id: sr.receiver_id,
+        message_type: messageType,
+        status: 'PENDING',
+        channel,
+        scheduled_for: new Date().toISOString(),
+        idempotency_key: idempotencyKey,
+      },
+      {
+        onConflict: 'idempotency_key',
+        ignoreDuplicates: true,
+      }
+    );
+  }
+
+  logger.info('Created messages for status change', {
+    subscriptionId,
+    messageType,
+    receiverCount: subscriptionReceivers.length,
+  });
+}
+
+/**
+ * Handle a flight status change by creating appropriate messages.
+ * Called by the poller when a significant status change is detected.
+ */
+export async function handleFlightStatusChange(
   subscriptionId: string,
   flight: Flight,
   newStatus: string
 ): Promise<void> {
   const supabase = createAdminClient();
 
-  logger.info('Rescheduling messages for status change', {
+  logger.info('Handling flight status change', {
     subscriptionId,
     flightId: flight.id,
     newStatus,
   });
 
-  // If canceled, mark pending lifecycle messages as skipped and send cancellation
+  // If canceled, skip pending lifecycle messages and create cancellation
   if (newStatus === 'CANCELED') {
-    // Skip pending lifecycle messages
     await supabase
       .from('messages')
       .update({

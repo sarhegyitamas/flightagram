@@ -59,7 +59,7 @@ export default function CreateSubscriptionPage() {
   const [flightNumber, setFlightNumber] = useState("");
   const [flightDate, setFlightDate] = useState("");
   const [travellerName, setTravellerName] = useState("");
-  const [receivers, setReceivers] = useState<Receiver[]>([{ display_name: "", channel: "TELEGRAM", email_address: "", tone: "caring" }]);
+  const [receivers, setReceivers] = useState<Receiver[]>([{ display_name: "", channel: "TELEGRAM", email_address: "", tone: "loving" }]);
   const [flight, setFlight] = useState<Flight | null>(null);
   const [searching, setSearching] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -232,7 +232,7 @@ export default function CreateSubscriptionPage() {
 
   const addReceiver = () => {
     if (receivers.length < 3) {
-      setReceivers([...receivers, { display_name: "", channel: "TELEGRAM", email_address: "", tone: "caring" }]);
+      setReceivers([...receivers, { display_name: "", channel: "TELEGRAM", email_address: "", tone: "loving" }]);
     }
   };
 
@@ -608,7 +608,7 @@ export default function CreateSubscriptionPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs text-white/50">{t("toneLabel")}:</span>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
-                        {tonePresets[receivers[activePreviewReceiver].tone].icon} {t(TONE_OPTIONS.find((o) => o.value === receivers[activePreviewReceiver].tone)?.labelKey || "toneCaring")}
+                        {tonePresets[receivers[activePreviewReceiver].tone].icon} {t(TONE_OPTIONS.find((o) => o.value === receivers[activePreviewReceiver].tone)?.labelKey || "toneLoving")}
                       </span>
                     </div>
 

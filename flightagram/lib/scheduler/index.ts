@@ -96,6 +96,7 @@ async function fetchDueMessages(): Promise<DueMessageWithRelations[]> {
         is_active: subscription.is_active,
         adb_webhook_id: subscription.adb_webhook_id,
         polling_enabled: subscription.polling_enabled,
+        custom_messages: subscription.custom_messages,
         created_at: subscription.created_at,
         updated_at: subscription.updated_at,
       } as FlightSubscription,

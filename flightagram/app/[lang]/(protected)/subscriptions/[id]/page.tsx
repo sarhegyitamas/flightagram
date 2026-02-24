@@ -334,37 +334,6 @@ export default function SubscriptionDetailsPage({
                     {tc("close")}
                   </button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setNewReceiverChannel("TELEGRAM")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${newReceiverChannel === "TELEGRAM"
-                        ? "bg-purple-500/30 text-purple-300 border border-purple-500/50"
-                        : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
-                      }`}
-                  >
-                    Telegram
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNewReceiverChannel("EMAIL")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${newReceiverChannel === "EMAIL"
-                        ? "bg-purple-500/30 text-purple-300 border border-purple-500/50"
-                        : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
-                      }`}
-                  >
-                    Email
-                  </button>
-                </div>
-                {newReceiverChannel === "EMAIL" && (
-                  <input
-                    type="email"
-                    value={newReceiverEmail}
-                    onChange={(e) => setNewReceiverEmail(e.target.value)}
-                    placeholder="e.g. mom@example.com"
-                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
-                  />
-                )}
               </form>
             )}
 

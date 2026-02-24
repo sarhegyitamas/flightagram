@@ -353,35 +353,26 @@ export default function CreateSubscriptionPage() {
                       key={index}
                       className="bg-white/5 rounded-xl p-4 border border-white/10"
                     >
-                      {receiver.channel === "TELEGRAM" && (<div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-2">
                         <span className="font-medium text-white">{receiver.receiver.display_name}</span>
                         <span className="text-xs text-purple-300">
                           {t("telegramLink")}
                         </span>
-                      </div>)}
-                      {receiver.channel === "EMAIL" ? (
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-white">{receiver.receiver.display_name}</span>
-                          <span className="text-sm text-green-300 text-center">
-                            {t("emailConfirmationSent")}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            readOnly
-                            value={receiver.opt_in_url}
-                            className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white/80 text-sm"
-                          />
-                          <button
-                            onClick={() => copyToClipboard(receiver.opt_in_url, index)}
-                            className="px-4 py-2 bg-purple-500/20 text-purple-300 rounded-lg hover:bg-purple-500/30 transition-all border border-purple-500/30 text-sm whitespace-nowrap"
-                          >
-                            {copiedIndex === index ? t("copied") : t("copyLink")}
-                          </button>
-                        </div>
-                      )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          readOnly
+                          value={receiver.opt_in_url}
+                          className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white/80 text-sm"
+                        />
+                        <button
+                          onClick={() => copyToClipboard(receiver.opt_in_url, index)}
+                          className="px-4 py-2 bg-purple-500/20 text-purple-300 rounded-lg hover:bg-purple-500/30 transition-all border border-purple-500/30 text-sm whitespace-nowrap"
+                        >
+                          {copiedIndex === index ? t("copied") : t("copyLink")}
+                        </button>
+                      </div>
                     </div>
                   )
                 })}
@@ -524,39 +515,6 @@ export default function CreateSubscriptionPage() {
                           </button>
                         )}
                       </div>
-                      {/* Channel Toggle */}
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => updateReceiverField(index, "channel", "TELEGRAM")}
-                          className={`px-3 py-1.5 text-sm rounded-lg transition-all ${receiver.channel === "TELEGRAM"
-                            ? "bg-purple-500/30 text-purple-300 border border-purple-500/50"
-                            : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
-                            }`}
-                        >
-                          {t("channelTelegram")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateReceiverField(index, "channel", "EMAIL")}
-                          className={`px-3 py-1.5 text-sm rounded-lg transition-all ${receiver.channel === "EMAIL"
-                            ? "bg-purple-500/30 text-purple-300 border border-purple-500/50"
-                            : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
-                            }`}
-                        >
-                          {t("channelEmail")}
-                        </button>
-                      </div>
-                      {/* Email input (shown only for EMAIL channel) */}
-                      {receiver.channel === "EMAIL" && (
-                        <input
-                          type="email"
-                          value={receiver.email_address}
-                          onChange={(e) => updateReceiverField(index, "email_address", e.target.value)}
-                          placeholder={t("emailPlaceholder")}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition-all"
-                        />
-                      )}
                       {/* Per-Receiver Tone Selector */}
                       <div>
                         <label className="block text-xs font-medium text-white/60 mb-1.5">{t("toneLabel")}</label>

@@ -3,9 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouter } from "@/src/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { format } from "date-fns";
 import PageHeader from "@/components/PageHeader";
 import { type ToneType, type CustomizableMessageType, getPresetMessages, interpolateCustomMessage, tonePresets } from "@/lib/messages/presets";
 import { createClient } from "@/lib/supabase/client";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Flight {
   id?: string;
@@ -423,12 +426,33 @@ export default function CreateSubscriptionPage() {
                   <label className="block text-sm font-medium text-white/80 mb-2">
                     {t("flightDate")}
                   </label>
-                  <input
-                    type="date"
-                    value={flightDate}
-                    onChange={(e) => setFlightDate(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition-all [color-scheme:dark]"
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition-all flex items-center justify-between"
+                      >
+                        <span className={flightDate ? "text-white" : "text-white/40"}>
+                          {flightDate ? format(new Date(flightDate + "T12:00:00"), "MMM d, yyyy") : t("flightDate")}
+                        </span>
+                        <svg className="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={flightDate ? new Date(flightDate + "T12:00:00") : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            setFlightDate(format(date, "yyyy-MM-dd"));
+                          }
+                        }}
+                        disabled={{ before: new Date() }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 

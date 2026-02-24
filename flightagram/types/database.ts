@@ -259,18 +259,21 @@ export type Database = {
           id: string;
           subscription_id: string;
           receiver_id: string;
+          custom_messages: Json | null;
           created_at: string;
         };
         Insert: {
           id?: string;
           subscription_id: string;
           receiver_id: string;
+          custom_messages?: Json | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           subscription_id?: string;
           receiver_id?: string;
+          custom_messages?: Json | null;
           created_at?: string;
         };
         Relationships: [

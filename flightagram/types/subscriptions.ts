@@ -20,5 +20,5 @@ export interface SubscriptionWithJoins {
   updated_at: string;
   flights: FlightRow;
   travellers?: TravellerRef;
-  subscription_receivers: Array<{ receivers: ReceiverRow }>;
+  subscription_receivers: Array<{ receivers: ReceiverRow; custom_messages?: unknown | null }>;
 }

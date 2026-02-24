@@ -63,11 +63,36 @@ async function fetchDueMessages(): Promise<DueMessageWithRelations[]> {
     return [];
   }
 
+  // Batch-fetch per-receiver custom_messages from subscription_receivers
+  // to override subscription-level custom_messages when present
+  const subscriptionReceiverPairs = messages.map((m) => ({
+    subscription_id: m.subscription_id,
+    receiver_id: m.receiver_id,
+  }));
+  const uniqueSubIds = [...new Set(subscriptionReceiverPairs.map((p) => p.subscription_id))];
+
+  const { data: subReceivers } = await supabase
+    .from('subscription_receivers')
+    .select('subscription_id, receiver_id, custom_messages')
+    .in('subscription_id', uniqueSubIds);
+
+  // Build lookup: "subscriptionId:receiverId" → custom_messages
+  const perReceiverMessages = new Map<string, unknown>();
+  for (const sr of subReceivers || []) {
+    if (sr.custom_messages) {
+      perReceiverMessages.set(`${sr.subscription_id}:${sr.receiver_id}`, sr.custom_messages);
+    }
+  }
+
   // Transform the nested data
   return messages.map((m) => {
     const subscription = m.flight_subscriptions as unknown as FlightSubscription & {
       flights: Flight;
     };
+
+    // Use per-receiver custom_messages if available, otherwise fall back to subscription-level
+    const receiverKey = `${m.subscription_id}:${m.receiver_id}`;
+    const effectiveCustomMessages = perReceiverMessages.get(receiverKey) || subscription.custom_messages;
 
     return {
       message: {
@@ -96,7 +121,7 @@ async function fetchDueMessages(): Promise<DueMessageWithRelations[]> {
         is_active: subscription.is_active,
         adb_webhook_id: subscription.adb_webhook_id,
         polling_enabled: subscription.polling_enabled,
-        custom_messages: subscription.custom_messages,
+        custom_messages: effectiveCustomMessages,
         created_at: subscription.created_at,
         updated_at: subscription.updated_at,
       } as FlightSubscription,

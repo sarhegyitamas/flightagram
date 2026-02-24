@@ -21,6 +21,15 @@ type TravellerRow = Database['public']['Tables']['travellers']['Row'];
 type ReceiverRow = Database['public']['Tables']['receivers']['Row'];
 
 // Create subscription request schema
+const perReceiverCustomMessagesSchema = z.object({
+  tone: z.enum(['loving', 'caring', 'simple', 'funny']),
+  messages: z.object({
+    DEPARTURE: z.string().max(1000),
+    EN_ROUTE: z.string().max(1000),
+    ARRIVAL: z.string().max(1000),
+  }),
+});
+
 const createSubscriptionSchema = z.object({
   flight_number: z.string().min(2).max(10),
   flight_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -28,15 +37,9 @@ const createSubscriptionSchema = z.object({
     display_name: z.string().min(1).max(100),
     channel: z.enum(['TELEGRAM', 'EMAIL']).default('TELEGRAM'),
     email_address: z.string().email().optional(),
+    custom_messages: perReceiverCustomMessagesSchema.optional(),
   })).min(1).max(3),
-  custom_messages: z.object({
-    tone: z.enum(['loving', 'caring', 'simple', 'funny']),
-    messages: z.object({
-      DEPARTURE: z.string().max(1000),
-      EN_ROUTE: z.string().max(1000),
-      ARRIVAL: z.string().max(1000),
-    }),
-  }).optional(),
+  custom_messages: perReceiverCustomMessagesSchema.optional(),
 });
 
 /**
@@ -72,6 +75,7 @@ export async function GET() {
         *,
         flights(*),
         subscription_receivers(
+          custom_messages,
           receivers(*)
         )
       `)
@@ -249,12 +253,23 @@ export async function POST(request: NextRequest) {
 
     // Create subscription
     const receiverIds = receiverResults.map((r) => r.receiver.id);
+
+    // Build per-receiver custom_messages map (receiver_id → custom_messages)
+    const perReceiverCustomMessages: Record<string, { tone: string; messages: Record<string, string> }> = {};
+    for (let i = 0; i < receiverResults.length; i++) {
+      const receiverData = receivers[i];
+      if (receiverData.custom_messages) {
+        perReceiverCustomMessages[receiverResults[i].receiver.id] = receiverData.custom_messages;
+      }
+    }
+
     const subscription = await createSubscription(
       traveller.id,
       flight.id,
       traveller_name,
       receiverIds,
-      custom_messages
+      custom_messages,
+      Object.keys(perReceiverCustomMessages).length > 0 ? perReceiverCustomMessages : undefined
     );
 
     if (!subscription) {

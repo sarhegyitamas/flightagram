@@ -158,7 +158,8 @@ export async function createSubscription(
   flightId: string,
   travellerName: string,
   receiverIds: string[],
-  customMessages?: { tone: string; messages: Record<string, string> }
+  customMessages?: { tone: string; messages: Record<string, string> },
+  perReceiverCustomMessages?: Record<string, { tone: string; messages: Record<string, string> }>
 ): Promise<FlightSubscription | null> {
   const supabase = createAdminClient();
 
@@ -203,6 +204,9 @@ export async function createSubscription(
     const receiverLinks = receiverIds.map((receiverId) => ({
       subscription_id: subscription.id,
       receiver_id: receiverId,
+      ...(perReceiverCustomMessages?.[receiverId]
+        ? { custom_messages: perReceiverCustomMessages[receiverId] }
+        : {}),
     }));
 
     const { error: linkError } = await supabase

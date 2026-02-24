@@ -25,6 +25,14 @@ const addReceiverSchema = z.object({
   display_name: z.string().min(1).max(100),
   channel: z.enum(['TELEGRAM', 'EMAIL']).default('TELEGRAM'),
   email_address: z.string().email().optional(),
+  custom_messages: z.object({
+    tone: z.enum(['loving', 'caring', 'simple', 'funny']),
+    messages: z.object({
+      DEPARTURE: z.string().max(1000),
+      EN_ROUTE: z.string().max(1000),
+      ARRIVAL: z.string().max(1000),
+    }),
+  }).optional(),
 });
 
 /**
@@ -144,6 +152,7 @@ export async function POST(
       .insert({
         subscription_id: subscriptionId,
         receiver_id: receiver.id,
+        ...(result.data.custom_messages ? { custom_messages: result.data.custom_messages } : {}),
       });
 
     if (subReceiverError) {

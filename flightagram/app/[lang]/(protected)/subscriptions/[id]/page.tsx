@@ -6,6 +6,13 @@ import { useTranslations } from "next-intl";
 import { use } from "react";
 import PageHeader from "@/components/PageHeader";
 
+const TONE_LABELS: Record<string, { icon: string; label: string }> = {
+  loving: { icon: "\u2764\uFE0F", label: "Loving" },
+  caring: { icon: "\uD83D\uDC9C", label: "Caring" },
+  simple: { icon: "\u2709\uFE0F", label: "Simple" },
+  funny: { icon: "\uD83D\uDE04", label: "Funny" },
+};
+
 interface SubscriptionDetails {
   subscription: {
     id: string;
@@ -33,6 +40,8 @@ interface SubscriptionDetails {
     channel: string;
     opt_in_status: string;
     opt_in_url: string;
+    tone: string | null;
+    custom_messages: { tone: string; messages: Record<string, string> } | null;
   }>;
   messages: Array<{
     id: string;
@@ -377,6 +386,11 @@ export default function SubscriptionDetailsPage({
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/50">
                           {receiver.channel === "EMAIL" ? "Email" : "Telegram"}
                         </span>
+                        {receiver.tone && TONE_LABELS[receiver.tone] && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">
+                            {TONE_LABELS[receiver.tone].icon} {TONE_LABELS[receiver.tone].label}
+                          </span>
+                        )}
                       </div>
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full ${getOptInStatusColor(receiver.opt_in_status)}`}

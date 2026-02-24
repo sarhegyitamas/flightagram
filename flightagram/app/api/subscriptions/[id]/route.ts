@@ -40,6 +40,7 @@ export async function GET(
         flights(*),
         travellers!inner(user_id),
         subscription_receivers(
+          custom_messages,
           receivers(*)
         )
       `)
@@ -105,12 +106,15 @@ export async function GET(
             ? emailAdapter.generateOptInLink(link.opt_in_token)
             : telegramAdapter.generateOptInLink(link.opt_in_token);
         }
+        const customMessages = sr.custom_messages as { tone: string; messages: Record<string, string> } | null;
         return {
           id: sr.receivers.id,
           display_name: sr.receivers.display_name,
           channel,
           opt_in_status: link?.opt_in_status || 'PENDING',
           opt_in_url: optInUrl,
+          tone: customMessages?.tone || null,
+          custom_messages: customMessages || null,
         };
       }),
       messages: messages || [],

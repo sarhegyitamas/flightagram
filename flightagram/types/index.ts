@@ -110,6 +110,7 @@ export interface SubscriptionReceiver {
   id: string;
   subscription_id: string;
   receiver_id: string;
+  custom_messages: Record<string, unknown> | null;
   created_at: string;
 }
 

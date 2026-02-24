@@ -24,6 +24,7 @@ interface Receiver {
   display_name: string;
   channel: "TELEGRAM" | "EMAIL";
   email_address: string;
+  tone: ToneType;
 }
 
 interface CreatedSubscription {
@@ -55,20 +56,20 @@ export default function CreateSubscriptionPage() {
   const [flightNumber, setFlightNumber] = useState("");
   const [flightDate, setFlightDate] = useState("");
   const [travellerName, setTravellerName] = useState("");
-  const [receivers, setReceivers] = useState<Receiver[]>([{ display_name: "", channel: "TELEGRAM", email_address: "" }]);
+  const [receivers, setReceivers] = useState<Receiver[]>([{ display_name: "", channel: "TELEGRAM", email_address: "", tone: "caring" }]);
   const [flight, setFlight] = useState<Flight | null>(null);
   const [searching, setSearching] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [messageNumber, setMessageNumber] = useState(0);
+  const [messageNumbers, setMessageNumbers] = useState<Record<number, number>>({});
   const [error, setError] = useState<string | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [created, setCreated] = useState<CreatedSubscription | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  // Custom messages state — holds interpolated (display) text
-  const [selectedTone, setSelectedTone] = useState<ToneType>("caring");
-  const [customMessages, setCustomMessages] = useState<Record<CustomizableMessageType, string>>({ DEPARTURE: "", EN_ROUTE: "", ARRIVAL: "" });
+  // Per-receiver custom messages state — keyed by receiver index
+  const [perReceiverMessages, setPerReceiverMessages] = useState<Record<number, Record<CustomizableMessageType, string>>>({});
   const [messagesInitialized, setMessagesInitialized] = useState(false);
+  const [activePreviewReceiver, setActivePreviewReceiver] = useState(0);
 
   const t = useTranslations("subscription.create");
   const tc = useTranslations("common");
@@ -88,15 +89,19 @@ export default function CreateSubscriptionPage() {
 
   // Initialize messages section when receivers are filled in
   const hasValidReceiver = receivers.some((r) => r.display_name.trim());
-  const firstReceiverName = receivers.find((r) => r.display_name.trim())?.display_name || "";
+  const validReceiverIndices = receivers.reduce<number[]>((acc, r, i) => {
+    if (r.display_name.trim()) acc.push(i);
+    return acc;
+  }, []);
 
-  // Track previous names so we can find-and-replace when they change
+  // Track previous names so we can regenerate when they change
   const prevTravellerName = useRef(travellerName);
-  const prevReceiverName = useRef(firstReceiverName);
+  const prevReceiverNames = useRef<string[]>(receivers.map((r) => r.display_name));
 
-  const generatePreviewMessages = (tone: ToneType, msgNum?: number): Record<CustomizableMessageType, string> => {
+  const generatePreviewForReceiver = (receiverIndex: number, tone: ToneType, msgNum?: number): Record<CustomizableMessageType, string> => {
     const raw = getPresetMessages(tone);
-    const num = msgNum ?? messageNumber;
+    const num = msgNum ?? (messageNumbers[receiverIndex] || 0);
+    const receiverName = receivers[receiverIndex]?.display_name || "";
     const result = {} as Record<CustomizableMessageType, string>;
     for (const type of ["DEPARTURE", "EN_ROUTE", "ARRIVAL"] as CustomizableMessageType[]) {
       result[type] = interpolateCustomMessage(raw[type][num], {
@@ -104,7 +109,7 @@ export default function CreateSubscriptionPage() {
         flight: flightNumber,
         origin: flight?.departure_airport_name || flight?.departure_airport || "",
         destination: flight?.arrival_airport_name || flight?.arrival_airport || "",
-        receiver: firstReceiverName,
+        receiver: receiverName,
       });
     }
     return result;
@@ -112,7 +117,13 @@ export default function CreateSubscriptionPage() {
 
   useEffect(() => {
     if (flight && travellerName && hasValidReceiver && !messagesInitialized) {
-      setCustomMessages(generatePreviewMessages(selectedTone));
+      const initial: Record<number, Record<CustomizableMessageType, string>> = {};
+      receivers.forEach((r, i) => {
+        if (r.display_name.trim()) {
+          initial[i] = generatePreviewForReceiver(i, r.tone);
+        }
+      });
+      setPerReceiverMessages(initial);
       setMessagesInitialized(true);
     }
   }, [flight, travellerName, hasValidReceiver, messagesInitialized]);
@@ -121,39 +132,67 @@ export default function CreateSubscriptionPage() {
   useEffect(() => {
     if (!messagesInitialized) return;
     const oldTraveller = prevTravellerName.current;
-    const oldReceiver = prevReceiverName.current;
+    const oldNames = prevReceiverNames.current;
+    const newNames = receivers.map((r) => r.display_name);
 
-    if (oldTraveller !== travellerName || oldReceiver !== firstReceiverName) {
-      setCustomMessages(generatePreviewMessages(selectedTone));
+    let changed = oldTraveller !== travellerName;
+    if (!changed) {
+      for (let i = 0; i < Math.max(oldNames.length, newNames.length); i++) {
+        if ((oldNames[i] || "") !== (newNames[i] || "")) { changed = true; break; }
+      }
+    }
+
+    if (changed) {
+      const updated: Record<number, Record<CustomizableMessageType, string>> = {};
+      receivers.forEach((r, i) => {
+        if (r.display_name.trim()) {
+          updated[i] = generatePreviewForReceiver(i, r.tone);
+        }
+      });
+      setPerReceiverMessages(updated);
     }
 
     prevTravellerName.current = travellerName;
-    prevReceiverName.current = firstReceiverName;
-  }, [travellerName, firstReceiverName, messagesInitialized]);
+    prevReceiverNames.current = newNames;
+  }, [travellerName, receivers, messagesInitialized]);
 
-  const handleToneChange = (tone: ToneType) => {
-    setSelectedTone(tone);
-    setCustomMessages(generatePreviewMessages(tone));
+  const handleToneChange = (receiverIndex: number, tone: ToneType) => {
+    const updated = [...receivers];
+    updated[receiverIndex] = { ...updated[receiverIndex], tone };
+    setReceivers(updated);
+    setPerReceiverMessages((prev) => ({
+      ...prev,
+      [receiverIndex]: generatePreviewForReceiver(receiverIndex, tone),
+    }));
   };
 
-  const handleRegenerateMessages = () => {
-    const nextNum = messageNumber + 1 > 3 ? 0 : messageNumber + 1;
-    setMessageNumber(nextNum);
-    setCustomMessages(generatePreviewMessages(selectedTone, nextNum));
+  const handleRegenerateMessages = (receiverIndex: number) => {
+    const currentNum = messageNumbers[receiverIndex] || 0;
+    const nextNum = currentNum + 1 > 3 ? 0 : currentNum + 1;
+    setMessageNumbers((prev) => ({ ...prev, [receiverIndex]: nextNum }));
+    setPerReceiverMessages((prev) => ({
+      ...prev,
+      [receiverIndex]: generatePreviewForReceiver(receiverIndex, receivers[receiverIndex].tone, nextNum),
+    }));
   };
 
-  const updateCustomMessage = (type: CustomizableMessageType, value: string) => {
-    setCustomMessages((prev) => ({ ...prev, [type]: value }));
+  const updateCustomMessage = (receiverIndex: number, type: CustomizableMessageType, value: string) => {
+    setPerReceiverMessages((prev) => ({
+      ...prev,
+      [receiverIndex]: { ...(prev[receiverIndex] || { DEPARTURE: "", EN_ROUTE: "", ARRIVAL: "" }), [type]: value },
+    }));
   };
 
-  // Before saving, replace first receiver's name with {receiver} placeholder
-  // so each receiver sees their own name at dispatch time
-  const getTemplateMessages = (): Record<CustomizableMessageType, string> => {
+  // Before saving, replace receiver's name with {receiver} placeholder
+  const getTemplateMessagesForReceiver = (receiverIndex: number): Record<CustomizableMessageType, string> => {
+    const msgs = perReceiverMessages[receiverIndex];
+    if (!msgs) return { DEPARTURE: "", EN_ROUTE: "", ARRIVAL: "" };
+    const receiverName = receivers[receiverIndex]?.display_name || "";
     const result = {} as Record<CustomizableMessageType, string>;
     for (const type of ["DEPARTURE", "EN_ROUTE", "ARRIVAL"] as CustomizableMessageType[]) {
-      result[type] = firstReceiverName
-        ? customMessages[type].replaceAll(firstReceiverName, "{receiver}")
-        : customMessages[type];
+      result[type] = receiverName
+        ? msgs[type].replaceAll(receiverName, "{receiver}")
+        : msgs[type];
     }
     return result;
   };
@@ -190,12 +229,26 @@ export default function CreateSubscriptionPage() {
 
   const addReceiver = () => {
     if (receivers.length < 3) {
-      setReceivers([...receivers, { display_name: "", channel: "TELEGRAM", email_address: "" }]);
+      setReceivers([...receivers, { display_name: "", channel: "TELEGRAM", email_address: "", tone: "caring" }]);
     }
   };
 
   const removeReceiver = (index: number) => {
     setReceivers(receivers.filter((_, i) => i !== index));
+    // Clean up per-receiver messages and reindex
+    setPerReceiverMessages((prev) => {
+      const next: Record<number, Record<CustomizableMessageType, string>> = {};
+      let newIdx = 0;
+      for (let i = 0; i < receivers.length; i++) {
+        if (i === index) continue;
+        if (prev[i]) next[newIdx] = prev[i];
+        newIdx++;
+      }
+      return next;
+    });
+    if (activePreviewReceiver >= receivers.length - 1) {
+      setActivePreviewReceiver(Math.max(0, receivers.length - 2));
+    }
   };
 
   const updateReceiverField = (index: number, field: keyof Receiver, value: string) => {
@@ -211,11 +264,20 @@ export default function CreateSubscriptionPage() {
 
     const validReceivers = receivers
       .filter((r) => r.display_name.trim())
-      .map((r) => ({
-        display_name: r.display_name,
-        channel: r.channel,
-        ...(r.channel === "EMAIL" && r.email_address ? { email_address: r.email_address } : {}),
-      }));
+      .map((r, filteredIndex) => {
+        // Find the original index of this receiver in the full array
+        const originalIndex = receivers.findIndex((orig) => orig === r);
+        const templateMessages = getTemplateMessagesForReceiver(originalIndex);
+        return {
+          display_name: r.display_name,
+          channel: r.channel,
+          ...(r.channel === "EMAIL" && r.email_address ? { email_address: r.email_address } : {}),
+          custom_messages: {
+            tone: r.tone,
+            messages: templateMessages,
+          },
+        };
+      });
     if (validReceivers.length === 0) return;
 
     setCreating(true);
@@ -231,10 +293,6 @@ export default function CreateSubscriptionPage() {
           flight_number: flightNumber,
           flight_date: flightDate,
           receivers: validReceivers,
-          custom_messages: {
-            tone: selectedTone,
-            messages: getTemplateMessages(),
-          },
         }),
       });
 
@@ -499,6 +557,25 @@ export default function CreateSubscriptionPage() {
                           className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition-all"
                         />
                       )}
+                      {/* Per-Receiver Tone Selector */}
+                      <div>
+                        <label className="block text-xs font-medium text-white/60 mb-1.5">{t("toneLabel")}</label>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {TONE_OPTIONS.map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => handleToneChange(index, option.value)}
+                              className={`px-2.5 py-1 text-xs rounded-lg transition-all ${receiver.tone === option.value
+                                  ? "bg-purple-500/30 text-purple-300 border border-purple-500/50"
+                                  : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
+                                }`}
+                            >
+                              {tonePresets[option.value].icon} {t(option.labelKey)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -518,47 +595,58 @@ export default function CreateSubscriptionPage() {
               </div>
             )}
 
-            {/* Messages Section */}
+            {/* Messages Section — Per-Receiver Tabs */}
             {messagesInitialized && (
               <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10">
                 <h2 className="text-lg font-semibold text-white mb-2">{t("messagesTitle")}</h2>
                 <p className="text-white/60 text-sm mb-4">{t("messagesDesc")}</p>
 
-                {/* Tone Selector */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-white/80 mb-2">{t("toneLabel")}</label>
-                  <div className="flex items-center gap-2">
-                    {TONE_OPTIONS.map((option) => (
+                {/* Receiver Tabs */}
+                {validReceiverIndices.length > 1 && (
+                  <div className="flex items-center gap-2 mb-4">
+                    {validReceiverIndices.map((idx) => (
                       <button
-                        key={option.value}
+                        key={idx}
                         type="button"
-                        onClick={() => handleToneChange(option.value)}
-                        className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedTone === option.value
+                        onClick={() => setActivePreviewReceiver(idx)}
+                        className={`px-3 py-1.5 text-sm rounded-lg transition-all ${activePreviewReceiver === idx
                             ? "bg-purple-500/30 text-purple-300 border border-purple-500/50"
                             : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
                           }`}
                       >
-                        {tonePresets[option.value].icon} {t(option.labelKey)}
+                        {receivers[idx].display_name || `Receiver ${idx + 1}`}
                       </button>
                     ))}
                   </div>
+                )}
 
-                  {/* Regenerate Button */}
-                  <button
-                    type="button"
-                    onClick={handleRegenerateMessages}
-                    className="mt-3 px-4 py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    {t("regenerateMessages")}
-                  </button>
-                </div>
+                {/* Active receiver's tone indicator + regenerate */}
+                {validReceiverIndices.includes(activePreviewReceiver) && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs text-white/50">{t("toneLabel")}:</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
+                        {tonePresets[receivers[activePreviewReceiver].tone].icon} {t(TONE_OPTIONS.find((o) => o.value === receivers[activePreviewReceiver].tone)?.labelKey || "toneCaring")}
+                      </span>
+                    </div>
+
+                    {/* Regenerate Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleRegenerateMessages(activePreviewReceiver)}
+                      className="px-4 py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      {t("regenerateMessages")}
+                    </button>
+                  </div>
+                )}
 
                 <p className="text-white/40 text-xs mb-4">{t("messagePreviewEditHint")}</p>
 
-                {/* Message Textareas */}
+                {/* Message Textareas for active receiver */}
                 <div className="space-y-4">
                   {MESSAGE_TYPE_LABELS.map(({ type, labelKey }) => (
                     <div key={type}>
@@ -566,8 +654,8 @@ export default function CreateSubscriptionPage() {
                         {t(labelKey)}
                       </label>
                       <textarea
-                        value={customMessages[type]}
-                        onChange={(e) => updateCustomMessage(type, e.target.value)}
+                        value={perReceiverMessages[activePreviewReceiver]?.[type] || ""}
+                        onChange={(e) => updateCustomMessage(activePreviewReceiver, type, e.target.value)}
                         rows={3}
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition-all resize-none text-sm"
                       />
@@ -575,7 +663,7 @@ export default function CreateSubscriptionPage() {
                   ))}
                 </div>
 
-                <p className="text-white/40 text-xs mt-3">{t("messagePreviewPlaceholderNote", { firstReceiver: firstReceiverName || "..." })}</p>
+                <p className="text-white/40 text-xs mt-3">{t("messagePreviewPlaceholderNote", { firstReceiver: receivers[activePreviewReceiver]?.display_name || "..." })}</p>
               </div>
             )}
 

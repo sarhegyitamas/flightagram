@@ -68,6 +68,9 @@ export default function SubscriptionDetailsPage({
   const [newReceiverEmail, setNewReceiverEmail] = useState("");
   const [showAddReceiver, setShowAddReceiver] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState("");
+  const [savingMessage, setSavingMessage] = useState(false);
 
   const t = useTranslations("subscription.details");
   const tc = useTranslations("common");
@@ -149,6 +152,28 @@ export default function SubscriptionDetailsPage({
     await navigator.clipboard.writeText(text);
     setCopiedId(receiverId);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleSaveMessage = async (receiverId: string, messageType: string) => {
+    setSavingMessage(true);
+    try {
+      const response = await fetch(`/api/subscriptions/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receiver_id: receiverId,
+          message_type: messageType,
+          message: editingValue,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to update message");
+      setEditingKey(null);
+      fetchDetails();
+    } catch {
+      alert(tc("error"));
+    } finally {
+      setSavingMessage(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -389,34 +414,127 @@ export default function SubscriptionDetailsPage({
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-white/50 text-sm">
-                    <th className="pb-3">Receiver</th>
-                    <th className="pb-3">Type</th>
+                    <th className="pb-3">{t("receiver")}</th>
+                    <th className="pb-3">{t("type")}</th>
                     <th className="pb-3">{t("scheduledFor")}</th>
-                    <th className="pb-3">Status</th>
+                    <th className="pb-3">{t("status")}</th>
+                    <th className="pb-3">{t("message")}</th>
                   </tr>
                 </thead>
                 <tbody className="text-white">
-                  {messages.map((message) => {
-                    const receiver = receivers.find((r) => r.id === message.receiver_id);
-                    return (
-                      <tr key={message.id} className="border-t border-white/10">
-                        <td className="py-3">{receiver?.display_name || "Unknown"}</td>
-                        <td className="py-3">
-                          {t(`messageType.${message.message_type.toLowerCase()}`)}
-                        </td>
-                        <td className="py-3 text-white/70">
-                          {formatDateTime(message.scheduled_for)}
-                        </td>
-                        <td className="py-3">
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full ${getMessageStatusColor(message.status)}`}
-                          >
-                            {t(`messageStatus.${message.status.toLowerCase()}`)}
-                          </span>
-                        </td>
-                      </tr>
+                  {(() => {
+                    const CUSTOMIZABLE_TYPES = ["DEPARTURE", "EN_ROUTE", "ARRIVAL"] as const;
+                    // Build a set of existing message keys (receiver_id:message_type)
+                    const existingKeys = new Set(
+                      messages.map((m) => `${m.receiver_id}:${m.message_type}`)
                     );
-                  })}
+                    // Build rows from custom_messages templates that don't have a messages row yet
+                    const templateRows = receivers.flatMap((receiver) => {
+                      if (!receiver.custom_messages?.messages) return [];
+                      return CUSTOMIZABLE_TYPES
+                        .filter((type) => !existingKeys.has(`${receiver.id}:${type}`))
+                        .map((type) => ({
+                          key: `template:${receiver.id}:${type}`,
+                          receiver_id: receiver.id,
+                          message_type: type,
+                          scheduled_for: null as string | null,
+                          status: "scheduled",
+                        }));
+                    });
+                    const allRows = [
+                      ...messages.map((m) => ({
+                        key: m.id,
+                        receiver_id: m.receiver_id,
+                        message_type: m.message_type,
+                        scheduled_for: m.scheduled_for as string | null,
+                        status: m.status,
+                      })),
+                      ...templateRows,
+                    ];
+
+                    return allRows.map((row) => {
+                      const receiver = receivers.find((r) => r.id === row.receiver_id);
+                      const isCustomizable = CUSTOMIZABLE_TYPES.includes(
+                        row.message_type as (typeof CUSTOMIZABLE_TYPES)[number]
+                      );
+                      const rawCustomMsg = receiver?.custom_messages?.messages?.[row.message_type] || "";
+                      const customMsg = rawCustomMsg.replace(/\{receiver\}/g, receiver?.display_name || "");
+                      const rowKey = `${row.receiver_id}:${row.message_type}`;
+                      const isEditing = editingKey === rowKey;
+
+                      return (
+                        <tr key={row.key} className="border-t border-white/10">
+                          <td className="py-3">{receiver?.display_name || "Unknown"}</td>
+                          <td className="py-3">
+                            {t(`messageType.${row.message_type.toLowerCase()}`)}
+                          </td>
+                          <td className="py-3 text-white/70">
+                            {row.scheduled_for ? formatDateTime(row.scheduled_for) : "-"}
+                          </td>
+                          <td className="py-3">
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full ${getMessageStatusColor(row.status)}`}
+                            >
+                              {t(`messageStatus.${row.status.toLowerCase()}`)}
+                            </span>
+                          </td>
+                          <td className="py-3">
+                            {isEditing ? (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={editingValue}
+                                  onChange={(e) => setEditingValue(e.target.value)}
+                                  className="flex-1 px-2 py-1 bg-white/10 border border-white/20 rounded text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-purple-400/50"
+                                  autoFocus
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleSaveMessage(row.receiver_id, row.message_type);
+                                    if (e.key === "Escape") setEditingKey(null);
+                                  }}
+                                />
+                                <button
+                                  onClick={() => handleSaveMessage(row.receiver_id, row.message_type)}
+                                  disabled={savingMessage}
+                                  className="p-1 text-green-400 hover:text-green-300 disabled:opacity-50"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => setEditingKey(null)}
+                                  className="p-1 text-white/40 hover:text-white/60"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <span className="text-white/70 text-sm truncate max-w-[200px]">
+                                  {customMsg || (isCustomizable ? "-" : "")}
+                                </span>
+                                {isCustomizable && (
+                                  <button
+                                    onClick={() => {
+                                      setEditingKey(rowKey);
+                                      setEditingValue(rawCustomMsg);
+                                    }}
+                                    className="p-1 text-white/30 hover:text-purple-400 transition-colors flex-shrink-0"
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
                 </tbody>
               </table>
             </div>

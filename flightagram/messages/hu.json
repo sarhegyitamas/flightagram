@@ -278,6 +278,10 @@
       },
       "addReceiver": "Címzett hozzáadása",
       "cancelSubscription": "Feliratkozás törlése",
+      "status": "Státusz",
+      "type": "Típus",
+      "receiver": "Címzett",
+      "message": "Üzenet",
       "scheduledFor": "Ütemezve"
     }
   },

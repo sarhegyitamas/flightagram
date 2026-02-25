@@ -6,9 +6,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { cancelSubscription } from '@/lib/flights/tracker';
 import { telegramAdapter } from '@/lib/telegram/adapter';
 import { emailAdapter } from '@/lib/email/adapter';
+import { z } from 'zod';
 import type { ChannelType } from '@/types';
 import type { SubscriptionWithJoins, TravellerRef } from '@/types/subscriptions';
 
@@ -189,6 +191,115 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Cancel subscription error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+const updateMessageSchema = z.object({
+  receiver_id: z.string().uuid(),
+  message_type: z.enum(['DEPARTURE', 'EN_ROUTE', 'ARRIVAL']),
+  message: z.string().max(1000),
+});
+
+/**
+ * PATCH /api/subscriptions/[id] - Update a custom message for a receiver
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const result = updateMessageSchema.safeParse(body);
+
+    if (!result.success) {
+      return NextResponse.json(
+        { error: 'Invalid request', details: result.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { receiver_id, message_type, message } = result.data;
+
+    // Verify ownership
+    const { data: sub, error: subError } = await supabase
+      .from('flight_subscriptions')
+      .select('id, travellers!inner(user_id)')
+      .eq('id', id)
+      .single();
+
+    const subscription = sub as unknown as { id: string; travellers: TravellerRef } | null;
+
+    if (subError || !subscription) {
+      return NextResponse.json(
+        { error: 'Subscription not found' },
+        { status: 404 }
+      );
+    }
+
+    if (subscription.travellers.user_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
+    // Read current custom_messages from subscription_receivers
+    const adminClient = createAdminClient();
+    const { data: sr, error: srError } = await adminClient
+      .from('subscription_receivers')
+      .select('id, custom_messages')
+      .eq('subscription_id', id)
+      .eq('receiver_id', receiver_id)
+      .single();
+
+    if (srError || !sr) {
+      return NextResponse.json(
+        { error: 'Receiver not found on this subscription' },
+        { status: 404 }
+      );
+    }
+
+    const existing = (sr.custom_messages as { tone: string; messages: Record<string, string> } | null) || {
+      tone: 'loving',
+      messages: { DEPARTURE: '', EN_ROUTE: '', ARRIVAL: '' },
+    };
+
+    const updated = {
+      ...existing,
+      messages: {
+        ...existing.messages,
+        [message_type]: message,
+      },
+    };
+
+    const { error: updateError } = await adminClient
+      .from('subscription_receivers')
+      .update({ custom_messages: updated })
+      .eq('id', sr.id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    return NextResponse.json({ success: true, custom_messages: updated });
+  } catch (error) {
+    console.error('Update custom message error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

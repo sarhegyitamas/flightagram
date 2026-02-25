@@ -278,6 +278,10 @@
       },
       "addReceiver": "Add Receiver",
       "cancelSubscription": "Cancel Subscription",
+      "status": "Status",
+      "type": "Type",
+      "receiver": "Receiver",
+      "message": "Message",
       "scheduledFor": "Scheduled for"
     }
   },

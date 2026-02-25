@@ -156,17 +156,6 @@ export const QuickDemo = () => {
                     <Play className="w-5 h-5" />
                     {t("demo.play")}
                   </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="flex-1"
-                    size="lg"
-                  >
-                    <Link href={`/${locale}/auth/register`}>
-                      <Plane className="w-5 h-5" />
-                      {t("demo.setup")}
-                    </Link>
-                  </Button>
                 </div>
               </div>
             </CardContent>

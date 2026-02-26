@@ -113,7 +113,7 @@ export async function processAeroDataBoxWebhook(
         estimated_arrival: flightData.estimated_arrival,
         status: newStatus,
         raw_data: flightData.raw_data as Database['public']['Tables']['flights']['Row']['raw_data'],
-        status_version: existingFlight.status_version + 1,
+        status_version: (existingFlight.status_version ?? 0) + 1,
       };
 
       const { error: updateError } = await supabase

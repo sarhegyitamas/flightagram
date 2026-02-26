@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString();
     const updateData: Record<string, unknown> = {
       status: targetStatus,
-      status_version: flight.status_version + 1,
+      status_version: (flight.status_version ?? 0) + 1,
     };
 
     // Set realistic timestamps based on the new status
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       flight_id,
       old_status: oldStatus,
       new_status: targetStatus,
-      status_version: flight.status_version + 1,
+      status_version: (flight.status_version ?? 0) + 1,
       significant_change: significant,
       subscriptions_notified: subscriptionsNotified,
       message: significant

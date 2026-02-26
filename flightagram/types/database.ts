@@ -1,485 +1,775 @@
-/**
- * Supabase Database Types
- * Auto-generated types should replace this file after running:
- * npx supabase gen types typescript --local > types/database.ts
- *
- * For now, this provides manual type definitions.
- */
-
 export type Json =
   | string
   | number
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
-      travellers: {
+      EmailLog: {
         Row: {
-          id: string;
-          user_id: string;
-          display_name: string | null;
-          timezone: string;
-          created_at: string;
-          updated_at: string;
-        };
+          createdAt: string
+          id: string
+          response: Json | null
+          status: string
+          subscriberId: number
+          templateId: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          display_name?: string | null;
-          timezone?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
+          createdAt?: string
+          id: string
+          response?: Json | null
+          status: string
+          subscriberId: number
+          templateId: string
+        }
         Update: {
-          id?: string;
-          user_id?: string;
-          display_name?: string | null;
-          timezone?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      receivers: {
-        Row: {
-          id: string;
-          telegram_chat_id: number | null;
-          telegram_opted_in: boolean;
-          telegram_username: string | null;
-          email_address: string | null;
-          email_opted_in: boolean;
-          display_name: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          telegram_chat_id?: number | null;
-          telegram_opted_in?: boolean;
-          telegram_username?: string | null;
-          email_address?: string | null;
-          email_opted_in?: boolean;
-          display_name: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          telegram_chat_id?: number | null;
-          telegram_opted_in?: boolean;
-          telegram_username?: string | null;
-          email_address?: string | null;
-          email_opted_in?: boolean;
-          display_name?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      traveller_receiver_links: {
-        Row: {
-          id: string;
-          traveller_id: string;
-          receiver_id: string;
-          opt_in_token: string;
-          opt_in_status: 'PENDING' | 'ACTIVE' | 'UNSUBSCRIBED';
-          channel: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
-          opted_in_at: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          traveller_id: string;
-          receiver_id: string;
-          opt_in_token: string;
-          opt_in_status?: 'PENDING' | 'ACTIVE' | 'UNSUBSCRIBED';
-          channel?: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
-          opted_in_at?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          traveller_id?: string;
-          receiver_id?: string;
-          opt_in_token?: string;
-          opt_in_status?: 'PENDING' | 'ACTIVE' | 'UNSUBSCRIBED';
-          channel?: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
-          opted_in_at?: string | null;
-          created_at?: string;
-        };
+          createdAt?: string
+          id?: string
+          response?: Json | null
+          status?: string
+          subscriberId?: number
+          templateId?: string
+        }
         Relationships: [
           {
-            foreignKeyName: 'traveller_receiver_links_traveller_id_fkey';
-            columns: ['traveller_id'];
-            isOneToOne: false;
-            referencedRelation: 'travellers';
-            referencedColumns: ['id'];
+            foreignKeyName: "EmailLog_subscriberId_fkey"
+            columns: ["subscriberId"]
+            isOneToOne: false
+            referencedRelation: "WaitlistSubscriber"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'traveller_receiver_links_receiver_id_fkey';
-            columns: ['receiver_id'];
-            isOneToOne: false;
-            referencedRelation: 'receivers';
-            referencedColumns: ['id'];
+            foreignKeyName: "EmailLog_templateId_fkey"
+            columns: ["templateId"]
+            isOneToOne: false
+            referencedRelation: "EmailTemplate"
+            referencedColumns: ["id"]
           },
-        ];
-      };
-      flights: {
+        ]
+      }
+      EmailTemplate: {
         Row: {
-          id: string;
-          adb_flight_id: string | null;
-          flight_number: string;
-          airline_iata: string | null;
-          airline_name: string | null;
-          departure_airport: string;
-          departure_airport_name: string | null;
-          departure_airport_tz: string | null;
-          arrival_airport: string;
-          arrival_airport_name: string | null;
-          arrival_airport_tz: string | null;
-          scheduled_departure: string | null;
-          scheduled_arrival: string | null;
-          actual_departure: string | null;
-          actual_arrival: string | null;
-          estimated_arrival: string | null;
-          status: 'SCHEDULED' | 'DEPARTED' | 'EN_ROUTE' | 'ARRIVED' | 'DELAYED' | 'CANCELED';
-          status_version: number;
-          raw_data: Json | null;
-          created_at: string;
-          updated_at: string;
-        };
+          createdAt: string
+          description: string | null
+          id: string
+          name: string
+          zeptomailTemplateId: string
+        }
         Insert: {
-          id?: string;
-          adb_flight_id?: string | null;
-          flight_number: string;
-          airline_iata?: string | null;
-          airline_name?: string | null;
-          departure_airport: string;
-          departure_airport_name?: string | null;
-          departure_airport_tz?: string | null;
-          arrival_airport: string;
-          arrival_airport_name?: string | null;
-          arrival_airport_tz?: string | null;
-          scheduled_departure?: string | null;
-          scheduled_arrival?: string | null;
-          actual_departure?: string | null;
-          actual_arrival?: string | null;
-          estimated_arrival?: string | null;
-          status?: 'SCHEDULED' | 'DEPARTED' | 'EN_ROUTE' | 'ARRIVED' | 'DELAYED' | 'CANCELED';
-          status_version?: number;
-          raw_data?: Json | null;
-          created_at?: string;
-          updated_at?: string;
-        };
+          createdAt?: string
+          description?: string | null
+          id: string
+          name: string
+          zeptomailTemplateId: string
+        }
         Update: {
-          id?: string;
-          adb_flight_id?: string | null;
-          flight_number?: string;
-          airline_iata?: string | null;
-          airline_name?: string | null;
-          departure_airport?: string;
-          departure_airport_name?: string | null;
-          departure_airport_tz?: string | null;
-          arrival_airport?: string;
-          arrival_airport_name?: string | null;
-          arrival_airport_tz?: string | null;
-          scheduled_departure?: string | null;
-          scheduled_arrival?: string | null;
-          actual_departure?: string | null;
-          actual_arrival?: string | null;
-          estimated_arrival?: string | null;
-          status?: 'SCHEDULED' | 'DEPARTED' | 'EN_ROUTE' | 'ARRIVED' | 'DELAYED' | 'CANCELED';
-          status_version?: number;
-          raw_data?: Json | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
+          createdAt?: string
+          description?: string | null
+          id?: string
+          name?: string
+          zeptomailTemplateId?: string
+        }
+        Relationships: []
+      }
       flight_subscriptions: {
         Row: {
-          id: string;
-          traveller_id: string;
-          flight_id: string;
-          traveller_name: string;
-          is_active: boolean;
-          adb_webhook_id: string | null;
-          polling_enabled: boolean;
-          custom_messages: Json | null;
-          created_at: string;
-          updated_at: string;
-        };
+          adb_webhook_id: string | null
+          created_at: string | null
+          custom_messages: Json | null
+          flight_id: string
+          id: string
+          is_active: boolean | null
+          polling_enabled: boolean | null
+          traveller_id: string
+          traveller_name: string
+          updated_at: string | null
+        }
         Insert: {
-          id?: string;
-          traveller_id: string;
-          flight_id: string;
-          traveller_name: string;
-          is_active?: boolean;
-          adb_webhook_id?: string | null;
-          polling_enabled?: boolean;
-          custom_messages?: Json | null;
-          created_at?: string;
-          updated_at?: string;
-        };
+          adb_webhook_id?: string | null
+          created_at?: string | null
+          custom_messages?: Json | null
+          flight_id: string
+          id?: string
+          is_active?: boolean | null
+          polling_enabled?: boolean | null
+          traveller_id: string
+          traveller_name: string
+          updated_at?: string | null
+        }
         Update: {
-          id?: string;
-          traveller_id?: string;
-          flight_id?: string;
-          traveller_name?: string;
-          is_active?: boolean;
-          adb_webhook_id?: string | null;
-          polling_enabled?: boolean;
-          custom_messages?: Json | null;
-          created_at?: string;
-          updated_at?: string;
-        };
+          adb_webhook_id?: string | null
+          created_at?: string | null
+          custom_messages?: Json | null
+          flight_id?: string
+          id?: string
+          is_active?: boolean | null
+          polling_enabled?: boolean | null
+          traveller_id?: string
+          traveller_name?: string
+          updated_at?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: 'flight_subscriptions_traveller_id_fkey';
-            columns: ['traveller_id'];
-            isOneToOne: false;
-            referencedRelation: 'travellers';
-            referencedColumns: ['id'];
+            foreignKeyName: "flight_subscriptions_flight_id_fkey"
+            columns: ["flight_id"]
+            isOneToOne: false
+            referencedRelation: "flights"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'flight_subscriptions_flight_id_fkey';
-            columns: ['flight_id'];
-            isOneToOne: false;
-            referencedRelation: 'flights';
-            referencedColumns: ['id'];
+            foreignKeyName: "flight_subscriptions_traveller_id_fkey"
+            columns: ["traveller_id"]
+            isOneToOne: false
+            referencedRelation: "travellers"
+            referencedColumns: ["id"]
           },
-        ];
-      };
-      subscription_receivers: {
+        ]
+      }
+      flights: {
         Row: {
-          id: string;
-          subscription_id: string;
-          receiver_id: string;
-          custom_messages: Json | null;
-          created_at: string;
-        };
+          actual_arrival: string | null
+          actual_departure: string | null
+          adb_flight_id: string | null
+          airline_iata: string | null
+          airline_name: string | null
+          arrival_airport: string
+          arrival_airport_name: string | null
+          arrival_airport_tz: string | null
+          created_at: string | null
+          departure_airport: string
+          departure_airport_name: string | null
+          departure_airport_tz: string | null
+          estimated_arrival: string | null
+          flight_number: string
+          id: string
+          raw_data: Json | null
+          scheduled_arrival: string | null
+          scheduled_departure: string | null
+          status: Database["public"]["Enums"]["flight_status"] | null
+          status_version: number | null
+          updated_at: string | null
+        }
         Insert: {
-          id?: string;
-          subscription_id: string;
-          receiver_id: string;
-          custom_messages?: Json | null;
-          created_at?: string;
-        };
+          actual_arrival?: string | null
+          actual_departure?: string | null
+          adb_flight_id?: string | null
+          airline_iata?: string | null
+          airline_name?: string | null
+          arrival_airport: string
+          arrival_airport_name?: string | null
+          arrival_airport_tz?: string | null
+          created_at?: string | null
+          departure_airport: string
+          departure_airport_name?: string | null
+          departure_airport_tz?: string | null
+          estimated_arrival?: string | null
+          flight_number: string
+          id?: string
+          raw_data?: Json | null
+          scheduled_arrival?: string | null
+          scheduled_departure?: string | null
+          status?: Database["public"]["Enums"]["flight_status"] | null
+          status_version?: number | null
+          updated_at?: string | null
+        }
         Update: {
-          id?: string;
-          subscription_id?: string;
-          receiver_id?: string;
-          custom_messages?: Json | null;
-          created_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'subscription_receivers_subscription_id_fkey';
-            columns: ['subscription_id'];
-            isOneToOne: false;
-            referencedRelation: 'flight_subscriptions';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'subscription_receivers_receiver_id_fkey';
-            columns: ['receiver_id'];
-            isOneToOne: false;
-            referencedRelation: 'receivers';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      messages: {
-        Row: {
-          id: string;
-          subscription_id: string;
-          receiver_id: string;
-          message_type: 'DEPARTURE' | 'EN_ROUTE' | 'ARRIVAL' | 'DELAY' | 'CANCELLATION';
-          status: 'PENDING' | 'SCHEDULED' | 'SENT' | 'FAILED' | 'SKIPPED';
-          channel: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
-          scheduled_for: string | null;
-          content: string | null;
-          sent_at: string | null;
-          attempt_count: number;
-          max_attempts: number;
-          skip_reason: string | null;
-          idempotency_key: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          subscription_id: string;
-          receiver_id: string;
-          message_type: 'DEPARTURE' | 'EN_ROUTE' | 'ARRIVAL' | 'DELAY' | 'CANCELLATION';
-          status?: 'PENDING' | 'SCHEDULED' | 'SENT' | 'FAILED' | 'SKIPPED';
-          channel?: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
-          scheduled_for?: string | null;
-          content?: string | null;
-          sent_at?: string | null;
-          attempt_count?: number;
-          max_attempts?: number;
-          skip_reason?: string | null;
-          idempotency_key?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          subscription_id?: string;
-          receiver_id?: string;
-          message_type?: 'DEPARTURE' | 'EN_ROUTE' | 'ARRIVAL' | 'DELAY' | 'CANCELLATION';
-          status?: 'PENDING' | 'SCHEDULED' | 'SENT' | 'FAILED' | 'SKIPPED';
-          channel?: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
-          scheduled_for?: string | null;
-          content?: string | null;
-          sent_at?: string | null;
-          attempt_count?: number;
-          max_attempts?: number;
-          skip_reason?: string | null;
-          idempotency_key?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'messages_subscription_id_fkey';
-            columns: ['subscription_id'];
-            isOneToOne: false;
-            referencedRelation: 'flight_subscriptions';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'messages_receiver_id_fkey';
-            columns: ['receiver_id'];
-            isOneToOne: false;
-            referencedRelation: 'receivers';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
+          actual_arrival?: string | null
+          actual_departure?: string | null
+          adb_flight_id?: string | null
+          airline_iata?: string | null
+          airline_name?: string | null
+          arrival_airport?: string
+          arrival_airport_name?: string | null
+          arrival_airport_tz?: string | null
+          created_at?: string | null
+          departure_airport?: string
+          departure_airport_name?: string | null
+          departure_airport_tz?: string | null
+          estimated_arrival?: string | null
+          flight_number?: string
+          id?: string
+          raw_data?: Json | null
+          scheduled_arrival?: string | null
+          scheduled_departure?: string | null
+          status?: Database["public"]["Enums"]["flight_status"] | null
+          status_version?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       message_events: {
         Row: {
-          id: string;
-          message_id: string;
-          event_type: string;
-          provider_message_id: string | null;
-          error_message: string | null;
-          error_code: string | null;
-          metadata: Json | null;
-          created_at: string;
-        };
+          created_at: string | null
+          error_code: string | null
+          error_message: string | null
+          event_type: string
+          id: string
+          message_id: string
+          metadata: Json | null
+          provider_message_id: string | null
+        }
         Insert: {
-          id?: string;
-          message_id: string;
-          event_type: string;
-          provider_message_id?: string | null;
-          error_message?: string | null;
-          error_code?: string | null;
-          metadata?: Json | null;
-          created_at?: string;
-        };
+          created_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          message_id: string
+          metadata?: Json | null
+          provider_message_id?: string | null
+        }
         Update: {
-          id?: string;
-          message_id?: string;
-          event_type?: string;
-          provider_message_id?: string | null;
-          error_message?: string | null;
-          error_code?: string | null;
-          metadata?: Json | null;
-          created_at?: string;
-        };
+          created_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          message_id?: string
+          metadata?: Json | null
+          provider_message_id?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: 'message_events_message_id_fkey';
-            columns: ['message_id'];
-            isOneToOne: false;
-            referencedRelation: 'messages';
-            referencedColumns: ['id'];
+            foreignKeyName: "message_events_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
           },
-        ];
-      };
-      webhook_events: {
+        ]
+      }
+      messages: {
         Row: {
-          id: string;
-          source: string;
-          event_type: string | null;
-          raw_payload: Json;
-          parsed_payload: Json | null;
-          flight_id: string | null;
-          processed: boolean;
-          processed_at: string | null;
-          error_message: string | null;
-          created_at: string;
-        };
+          attempt_count: number | null
+          channel: Database["public"]["Enums"]["channel_type"] | null
+          content: string | null
+          created_at: string | null
+          id: string
+          idempotency_key: string | null
+          max_attempts: number | null
+          message_type: Database["public"]["Enums"]["message_type"]
+          receiver_id: string
+          scheduled_for: string | null
+          sent_at: string | null
+          skip_reason: string | null
+          status: Database["public"]["Enums"]["message_status"] | null
+          subscription_id: string
+          updated_at: string | null
+        }
         Insert: {
-          id?: string;
-          source?: string;
-          event_type?: string | null;
-          raw_payload: Json;
-          parsed_payload?: Json | null;
-          flight_id?: string | null;
-          processed?: boolean;
-          processed_at?: string | null;
-          error_message?: string | null;
-          created_at?: string;
-        };
+          attempt_count?: number | null
+          channel?: Database["public"]["Enums"]["channel_type"] | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          max_attempts?: number | null
+          message_type: Database["public"]["Enums"]["message_type"]
+          receiver_id: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: Database["public"]["Enums"]["message_status"] | null
+          subscription_id: string
+          updated_at?: string | null
+        }
         Update: {
-          id?: string;
-          source?: string;
-          event_type?: string | null;
-          raw_payload?: Json;
-          parsed_payload?: Json | null;
-          flight_id?: string | null;
-          processed?: boolean;
-          processed_at?: string | null;
-          error_message?: string | null;
-          created_at?: string;
-        };
+          attempt_count?: number | null
+          channel?: Database["public"]["Enums"]["channel_type"] | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          max_attempts?: number | null
+          message_type?: Database["public"]["Enums"]["message_type"]
+          receiver_id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: Database["public"]["Enums"]["message_status"] | null
+          subscription_id?: string
+          updated_at?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: 'webhook_events_flight_id_fkey';
-            columns: ['flight_id'];
-            isOneToOne: false;
-            referencedRelation: 'flights';
-            referencedColumns: ['id'];
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "receivers"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+          {
+            foreignKeyName: "messages_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "flight_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receivers: {
+        Row: {
+          created_at: string | null
+          display_name: string
+          email_address: string | null
+          email_opted_in: boolean | null
+          id: string
+          telegram_chat_id: number | null
+          telegram_opted_in: boolean | null
+          telegram_username: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name: string
+          email_address?: string | null
+          email_opted_in?: boolean | null
+          id?: string
+          telegram_chat_id?: number | null
+          telegram_opted_in?: boolean | null
+          telegram_username?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string
+          email_address?: string | null
+          email_opted_in?: boolean | null
+          id?: string
+          telegram_chat_id?: number | null
+          telegram_opted_in?: boolean | null
+          telegram_username?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       scheduler_locks: {
         Row: {
-          id: string;
-          locked_at: string;
-          locked_by: string | null;
-          expires_at: string;
-        };
+          expires_at: string
+          id: string
+          locked_at: string | null
+          locked_by: string | null
+        }
         Insert: {
-          id: string;
-          locked_at?: string;
-          locked_by?: string | null;
-          expires_at: string;
-        };
+          expires_at: string
+          id: string
+          locked_at?: string | null
+          locked_by?: string | null
+        }
         Update: {
-          id?: string;
-          locked_at?: string;
-          locked_by?: string | null;
-          expires_at?: string;
-        };
-        Relationships: [];
-      };
-    };
-    Views: {};
-    Functions: {};
+          expires_at?: string
+          id?: string
+          locked_at?: string | null
+          locked_by?: string | null
+        }
+        Relationships: []
+      }
+      subscription_receivers: {
+        Row: {
+          created_at: string | null
+          custom_messages: Json | null
+          id: string
+          receiver_id: string
+          subscription_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_messages?: Json | null
+          id?: string
+          receiver_id: string
+          subscription_id: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_messages?: Json | null
+          id?: string
+          receiver_id?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_receivers_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "receivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_receivers_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "flight_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      traveller_receiver_links: {
+        Row: {
+          channel: Database["public"]["Enums"]["channel_type"] | null
+          created_at: string | null
+          id: string
+          opt_in_status: Database["public"]["Enums"]["opt_in_status"] | null
+          opt_in_token: string
+          opted_in_at: string | null
+          receiver_id: string
+          traveller_id: string
+        }
+        Insert: {
+          channel?: Database["public"]["Enums"]["channel_type"] | null
+          created_at?: string | null
+          id?: string
+          opt_in_status?: Database["public"]["Enums"]["opt_in_status"] | null
+          opt_in_token: string
+          opted_in_at?: string | null
+          receiver_id: string
+          traveller_id: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["channel_type"] | null
+          created_at?: string | null
+          id?: string
+          opt_in_status?: Database["public"]["Enums"]["opt_in_status"] | null
+          opt_in_token?: string
+          opted_in_at?: string | null
+          receiver_id?: string
+          traveller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "traveller_receiver_links_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "receivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "traveller_receiver_links_traveller_id_fkey"
+            columns: ["traveller_id"]
+            isOneToOne: false
+            referencedRelation: "travellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travellers: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          id: string
+          timezone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          timezone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          timezone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      WaitlistAnswer: {
+        Row: {
+          createdAt: string
+          destination: string | null
+          id: number
+          nextFlightTime: string | null
+          preferredChannels: string[] | null
+          subscriberId: number
+        }
+        Insert: {
+          createdAt?: string
+          destination?: string | null
+          id?: number
+          nextFlightTime?: string | null
+          preferredChannels?: string[] | null
+          subscriberId: number
+        }
+        Update: {
+          createdAt?: string
+          destination?: string | null
+          id?: number
+          nextFlightTime?: string | null
+          preferredChannels?: string[] | null
+          subscriberId?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "WaitlistAnswer_subscriberId_fkey"
+            columns: ["subscriberId"]
+            isOneToOne: false
+            referencedRelation: "WaitlistSubscriber"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      WaitlistSubscriber: {
+        Row: {
+          email: string
+          firstname: string | null
+          id: number
+          isUnsubscribed: boolean
+          lastname: string | null
+          subscribedAt: string
+          unsubscribeToken: string
+        }
+        Insert: {
+          email: string
+          firstname?: string | null
+          id?: number
+          isUnsubscribed?: boolean
+          lastname?: string | null
+          subscribedAt?: string
+          unsubscribeToken: string
+        }
+        Update: {
+          email?: string
+          firstname?: string | null
+          id?: number
+          isUnsubscribed?: boolean
+          lastname?: string | null
+          subscribedAt?: string
+          unsubscribeToken?: string
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          event_type: string | null
+          flight_id: string | null
+          id: string
+          parsed_payload: Json | null
+          processed: boolean | null
+          processed_at: string | null
+          raw_payload: Json
+          source: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          event_type?: string | null
+          flight_id?: string | null
+          id?: string
+          parsed_payload?: Json | null
+          processed?: boolean | null
+          processed_at?: string | null
+          raw_payload: Json
+          source?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          event_type?: string | null
+          flight_id?: string | null
+          id?: string
+          parsed_payload?: Json | null
+          processed?: boolean | null
+          processed_at?: string | null
+          raw_payload?: Json
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_events_flight_id_fkey"
+            columns: ["flight_id"]
+            isOneToOne: false
+            referencedRelation: "flights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
     Enums: {
-      channel_type: 'TELEGRAM' | 'WHATSAPP' | 'EMAIL';
-      flight_status: 'SCHEDULED' | 'DEPARTED' | 'EN_ROUTE' | 'ARRIVED' | 'DELAYED' | 'CANCELED';
-      message_status: 'PENDING' | 'SCHEDULED' | 'SENT' | 'FAILED' | 'SKIPPED';
-      message_type: 'DEPARTURE' | 'EN_ROUTE' | 'ARRIVAL' | 'DELAY' | 'CANCELLATION';
-      opt_in_status: 'PENDING' | 'ACTIVE' | 'UNSUBSCRIBED';
-    };
-  };
-};
+      channel_type: "TELEGRAM" | "WHATSAPP" | "EMAIL"
+      flight_status:
+        | "SCHEDULED"
+        | "DEPARTED"
+        | "EN_ROUTE"
+        | "ARRIVED"
+        | "DELAYED"
+        | "CANCELED"
+      message_status: "PENDING" | "SCHEDULED" | "SENT" | "FAILED" | "SKIPPED"
+      message_type:
+        | "DEPARTURE"
+        | "EN_ROUTE"
+        | "ARRIVAL"
+        | "DELAY"
+        | "CANCELLATION"
+      opt_in_status: "PENDING" | "ACTIVE" | "UNSUBSCRIBED"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      channel_type: ["TELEGRAM", "WHATSAPP", "EMAIL"],
+      flight_status: [
+        "SCHEDULED",
+        "DEPARTED",
+        "EN_ROUTE",
+        "ARRIVED",
+        "DELAYED",
+        "CANCELED",
+      ],
+      message_status: ["PENDING", "SCHEDULED", "SENT", "FAILED", "SKIPPED"],
+      message_type: [
+        "DEPARTURE",
+        "EN_ROUTE",
+        "ARRIVAL",
+        "DELAY",
+        "CANCELLATION",
+      ],
+      opt_in_status: ["PENDING", "ACTIVE", "UNSUBSCRIBED"],
+    },
+  },
+} as const
+A new version of Supabase CLI is available: v2.75.0 (currently installed v2.74.5)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli

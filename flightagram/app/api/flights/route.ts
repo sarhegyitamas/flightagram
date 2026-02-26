@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
         estimated_arrival: flightData.estimated_arrival,
         status: flightData.status,
         raw_data: flightData.raw_data as Database['public']['Tables']['flights']['Row']['raw_data'],
-        status_version: existing.status_version + 1,
+        status_version: (existing.status_version ?? 0) + 1,
       };
 
       const { data: updated, error: updateError } = await adminClient

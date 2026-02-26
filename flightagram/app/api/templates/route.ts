@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { error } = await supabase.from('email_templates').insert({
+    const { error } = await supabase.from('EmailTemplate').insert({
+      id: crypto.randomUUID(),
       name,
       description: description || '',
       zeptomailTemplateId: key,

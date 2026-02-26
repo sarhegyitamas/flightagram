@@ -122,7 +122,7 @@ async function pollFlight(flight: Flight): Promise<boolean> {
       estimated_arrival: updatedData.estimated_arrival,
       status: newStatus,
       raw_data: updatedData.raw_data as Database['public']['Tables']['flights']['Row']['raw_data'],
-      status_version: flight.status_version + 1,
+      status_version: (flight.status_version ?? 0) + 1,
     };
 
     const { error: updateError } = await supabase

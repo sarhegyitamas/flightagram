@@ -8,7 +8,7 @@ type Props = {
 export default function WaitlistLayout({children}: Props) {
   return (
     <>
-      <Navbar hasBg={true} />
+      <Navbar />
       {children}
       <Footer />
     </>
